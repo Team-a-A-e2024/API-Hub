@@ -2,7 +2,7 @@
 ## Setup
 
 1. Clone project
-2. Create database named `placeholder`
+2. Create database named `peli`
 
 ## Authors
 **Project**: API-Hub <br>
