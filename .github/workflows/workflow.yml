@@ -1,0 +1,60 @@
+name: CI/CD WORKFLOW
+on:
+  push:
+    branches: [ main ]
+
+env:
+  IMAGE_NAME: api_hub
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - namespace: AbbasMB
+            user_secret: DOCKERHUB_USER_1
+            token_secret: DOCKERHUB_TOKEN_1
+          - namespace: iirne
+            user_secret: DOCKERHUB_USER_2
+            token_secret: DOCKERHUB_TOKEN_2
+          - namespace: Frederik-BipBop
+            user_secret: DOCKERHUB_USER_3
+            token_secret: DOCKERHUB_TOKEN_3
+          - namespace: Tatchapero
+            user_secret: DOCKERHUB_USER_4
+            token_secret: DOCKERHUB_TOKEN_4
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'corretto'
+
+      - name: Build with Maven
+        run: mvn --batch-mode clean package
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub (${{ matrix.target.namespace }})
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets[matrix.target.user_secret] }}
+          password: ${{ secrets[matrix.target.token_secret] }}
+
+      - name: Build and push image to ${{ matrix.target.namespace }}
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ${{ matrix.target.namespace }}/${{ env.IMAGE_NAME }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
