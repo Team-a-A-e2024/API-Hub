@@ -96,6 +96,5 @@ jobs:
           push: true
           tags: |
             ${{ matrix.target.namespace }}/${{ env.IMAGE_NAME }}:latest
-            ${{ matrix.target.namespace }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
