@@ -1,28 +1,67 @@
 name: CI/CD WORKFLOW
+
 on:
   push:
+    branches: [ main ]
+  pull_request:
     branches: [ main ]
 
 env:
   IMAGE_NAME: api_hub
 
 jobs:
+  # ---------- Pull Request pipeline (targets: main) ----------
+  test:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Run Maven Tests
+        run: mvn -B test --file pom.xml
+
+  build_pr:
+    if: github.event_name == 'pull_request'
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build with Maven
+        run: mvn -B package --file pom.xml
+
+  # ---------- Main branch push: build & push to 4 DockerHub accounts ----------
   build-and-push:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         target:
-          - namespace: AbbasMB
+          - namespace: abbasmb
             user_secret: DOCKERHUB_USER_1
             token_secret: DOCKERHUB_TOKEN_1
-          - namespace: iirne
+          - namespace: ea178
             user_secret: DOCKERHUB_USER_2
             token_secret: DOCKERHUB_TOKEN_2
-          - namespace: Frederik-BipBop
+          - namespace: bastiansen
             user_secret: DOCKERHUB_USER_3
             token_secret: DOCKERHUB_TOKEN_3
-          - namespace: Tatchapero
+          - namespace: tatchapero
             user_secret: DOCKERHUB_USER_4
             token_secret: DOCKERHUB_TOKEN_4
 
@@ -34,7 +73,8 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: '17'
-          distribution: 'corretto'
+          distribution: 'temurin'
+          cache: maven
 
       - name: Build with Maven
         run: mvn --batch-mode clean package
