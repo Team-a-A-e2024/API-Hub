@@ -23,6 +23,6 @@ public class Game {
     @Column(name = "first_release_date")
     private LocalDate firstReleaseDate;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT", length = 10000)
     private String summary;
 }
