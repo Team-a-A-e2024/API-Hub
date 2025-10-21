@@ -15,11 +15,9 @@ public class Routes {
         logger.info("Registering API routes...");
         return () -> {
             get("/", ctx -> ctx.result("API is running"));
-
-            path("/games", new GameRoutes().collection()); // GET /api/games, POST /api/games, GET /api/games/search
-            path("/game",  new GameRoutes().item());       // GET/PUT/DELETE /api/game/{id}
-
-            logger.info("Game routes registered under /game");
+            path("/games", gameRoutes.collection()); // GET /api/games, POST /api/games, GET /api/games/search
+            path("/game", gameRoutes.item());       // GET/PUT/DELETE /api/game/{id}
+            logger.info("Game routes registered under /game & /games");
         };
     }
 }

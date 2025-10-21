@@ -12,14 +12,13 @@ import java.util.List;
 
 public class GameDAO implements IDAO<GameDTO, Integer> {
 
-    private static GameDAO instance;
-    private static EntityManagerFactory emf;
+    private static final EntityManagerFactory emf = HibernateConfig.getEntityManagerFactory();
+    private static final GameDAO instance = new GameDAO();
 
-    public static GameDAO getInstance(EntityManagerFactory _emf) {
-        if (instance == null) {
-            emf = _emf;
-            instance = new GameDAO();
-        }
+    private GameDAO() {
+    }
+
+    public static GameDAO getInstance() {
         return instance;
     }
 
@@ -45,14 +44,19 @@ public class GameDAO implements IDAO<GameDTO, Integer> {
     public GameDTO create(GameDTO dto) {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
-            Game g = Game.builder()
-                    .name(dto.getName())
-                    .firstReleaseDate(dto.getFirstReleaseDate())
-                    .summary(dto.getSummary())
-                    .build();
-            em.persist(g);
-            em.getTransaction().commit();
-            return new GameDTO(g);
+            try {
+                Game g = Game.builder()
+                        .name(dto.getName())
+                        .firstReleaseDate(dto.getFirstReleaseDate())
+                        .summary(dto.getSummary())
+                        .build();
+                em.persist(g);
+                em.getTransaction().commit();
+                return new GameDTO(g);
+            } catch (RuntimeException e) {
+                if (em.getTransaction().isActive()) em.getTransaction().rollback();
+                throw e;
+            }
         }
     }
 
@@ -60,16 +64,21 @@ public class GameDAO implements IDAO<GameDTO, Integer> {
     public GameDTO update(Integer id, GameDTO dto) {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
-            Game existing = em.find(Game.class, id);
-            if (existing == null) {
-                em.getTransaction().rollback();
-                return null;
+            try {
+                Game existing = em.find(Game.class, id);
+                if (existing == null) {
+                    em.getTransaction().rollback();
+                    return null;
+                }
+                existing.setName(dto.getName());
+                existing.setFirstReleaseDate(dto.getFirstReleaseDate());
+                existing.setSummary(dto.getSummary());
+                em.getTransaction().commit();
+                return new GameDTO(existing);
+            } catch (RuntimeException e) {
+                if (em.getTransaction().isActive()) em.getTransaction().rollback();
+                throw e;
             }
-            existing.setName(dto.getName());
-            existing.setFirstReleaseDate(dto.getFirstReleaseDate());
-            existing.setSummary(dto.getSummary());
-            em.getTransaction().commit();
-            return new GameDTO(existing);
         }
     }
 
@@ -77,9 +86,14 @@ public class GameDAO implements IDAO<GameDTO, Integer> {
     public void delete(Integer id) {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
-            Game g = em.find(Game.class, id);
-            if (g != null) em.remove(g);
-            em.getTransaction().commit();
+            try {
+                Game g = em.find(Game.class, id);
+                if (g != null) em.remove(g);
+                em.getTransaction().commit();
+            } catch (RuntimeException e) {
+                if (em.getTransaction().isActive()) em.getTransaction().rollback();
+                throw e;
+            }
         }
     }
 

@@ -6,7 +6,6 @@ import dat.daos.impl.GameDAO;
 import dat.dtos.GameDTO;
 import dat.exceptions.Message;
 import io.javalin.http.Context;
-import jakarta.persistence.EntityManagerFactory;
 
 import java.util.List;
 
@@ -15,8 +14,7 @@ public class GameController implements IController<GameDTO, Integer> {
     private final GameDAO dao;
 
     public GameController() {
-        EntityManagerFactory emf = HibernateConfig.getEntityManagerFactory();
-        this.dao = GameDAO.getInstance(emf);
+        this.dao = GameDAO.getInstance();
     }
 
     // ---- e-helpers ----
