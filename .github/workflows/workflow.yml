@@ -1,4 +1,3 @@
-# .github/workflows/workflow.yml
 name: CI/CD WORKFLOW
 
 on:
@@ -8,7 +7,7 @@ on:
     branches: [ main ]
 
 env:
-  IMAGE_NAME: hotel_api
+  IMAGE_NAME: api_hub
 
 jobs:
   # ---------- Pull Request pipeline (targets: main) ----------
