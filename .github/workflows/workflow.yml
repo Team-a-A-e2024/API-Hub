@@ -1,13 +1,53 @@
+# .github/workflows/workflow.yml
 name: CI/CD WORKFLOW
+
 on:
   push:
     branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 env:
-  IMAGE_NAME: api_hub
+  IMAGE_NAME: hotel_api
 
 jobs:
+  # ---------- Pull Request pipeline (targets: main) ----------
+  test:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Run Maven Tests
+        run: mvn -B test --file pom.xml
+
+  build_pr:
+    if: github.event_name == 'pull_request'
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build with Maven
+        run: mvn -B package --file pom.xml
+
+  # ---------- Main branch push: build & push to 4 DockerHub accounts ----------
   build-and-push:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -34,7 +74,8 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: '17'
-          distribution: 'corretto'
+          distribution: 'temurin'
+          cache: maven
 
       - name: Build with Maven
         run: mvn --batch-mode clean package
@@ -56,5 +97,6 @@ jobs:
           push: true
           tags: |
             ${{ matrix.target.namespace }}/${{ env.IMAGE_NAME }}:latest
+            ${{ matrix.target.namespace }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
