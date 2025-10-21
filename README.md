@@ -2,11 +2,11 @@
 ## Setup
 
 1. Clone project
-2. Create database named `placeholder`
+2. Create database named `peli`
 
 ## Authors
 **Project**: API-Hub <br>
-**Course**: Datamatiker 2. semester <br>
+**Course**: Datamatiker 3. semester <br>
 **Education**: CPH Business Lyngby <br>
 
 **Name**: Abbas M. Badreddine <br>
