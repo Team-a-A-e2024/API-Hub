@@ -6,11 +6,11 @@ import dat.security.entities.User;
 import dat.security.exceptions.ApiException;
 import dat.security.exceptions.ValidationException;
 import dk.bugelhartmann.UserDTO;
+import io.javalin.http.Handler;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityNotFoundException;
-
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -79,5 +79,52 @@ public class SecurityDAO implements ISecurityDAO {
             return user;
         }
     }
+
+    public User editUser(UserDTO userDTO) {
+        try (EntityManager em = getEntityManager()) {
+            User user = em.find(User.class, userDTO.getUsername());
+            if (user == null) {
+                throw new EntityNotFoundException("No user found with username: " + userDTO.getUsername());
+            }
+            em.getTransaction().begin();
+            user.setPassword(userDTO.getPassword());
+            em.merge(user);
+            em.getTransaction().commit();
+            return user;
+        }
+    }
+
+    public User getUserByUsername(String username) {
+        try (EntityManager em = getEntityManager()) {
+            User user = em.find(User.class, username);
+            if (user == null)
+                throw new EntityNotFoundException("No user found with username: " + username);
+            user.getRoles().size();
+            return user;
+        }
+    }
+
+    public void deleteUser(String username) {
+        try (EntityManager em = getEntityManager()) {
+            User user = em.find(User.class, username);
+            if (user == null) {
+                throw new EntityNotFoundException("No user found with username: " + username);
+            }
+            em.getTransaction().begin();
+            for (Role role : user.getRoles()) {
+                role.getUsers().remove(user);
+            }
+            user.getRoles().clear();
+            em.remove(user);
+            em.getTransaction().commit();
+        }
+    }
+
+
+
+
+
+
+
 }
 

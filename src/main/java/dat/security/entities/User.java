@@ -1,5 +1,6 @@
 package dat.security.entities;
 
+import dk.bugelhartmann.UserDTO;
 import jakarta.persistence.*;
 import lombok.*;
 import org.mindrot.jbcrypt.BCrypt;
@@ -65,16 +66,6 @@ public class User implements Serializable, ISecurityUser {
         }
         roles.add(role);
         role.getUsers().add(this);
-    }
-
-    public void removeRole(String userRole) {
-        roles.stream()
-                .filter(role -> role.getRoleName().equals(userRole))
-                .findFirst()
-                .ifPresent(role -> {
-                    roles.remove(role);
-                    role.getUsers().remove(this);
-                });
     }
 }
 
