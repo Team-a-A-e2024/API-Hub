@@ -73,10 +73,6 @@ public class GameController implements IController<GameDTO, Integer> {
         int id = ctx.pathParamAsClass("id", Integer.class)
                 .check(this::validatePrimaryKey, "Not a valid id")
                 .get();
-        if (!dao.validatePrimaryKey(id)) {
-            ExceptionController.e4(ctx, "game");
-            return;
-        }
         dao.delete(id);
         ctx.status(204);
     }
