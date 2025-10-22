@@ -22,6 +22,7 @@ public class IgdbManager {
     private FetchTools fetchTools;
     private GameService gameService;
     private LocalDateTime LastUpdate;
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
     //todo: update path
     private final static String path = "igdbLog.txt";
 
@@ -33,7 +34,7 @@ public class IgdbManager {
 
     public void start() {
         ObjectMapper objectMapper = new ObjectMapper();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
 
         File file = new File(path);
         try {
@@ -67,7 +68,6 @@ public class IgdbManager {
 
     public void update() {
         ObjectMapper objectMapper = new ObjectMapper();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
         //if there hasn't been an update for 24 hours.
         if (LastUpdate.until(LocalDateTime.now(), ChronoUnit.SECONDS) > 28.800) {
