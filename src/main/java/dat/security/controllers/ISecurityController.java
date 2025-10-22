@@ -3,7 +3,6 @@ package dat.security.controllers;
 import dk.bugelhartmann.UserDTO;
 import io.javalin.http.Handler;
 import io.javalin.security.RouteRole;
-
 import java.util.Set;
 
 public interface ISecurityController {
