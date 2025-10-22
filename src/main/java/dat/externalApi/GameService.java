@@ -12,7 +12,6 @@ import java.util.concurrent.Callable;
 
 public class GameService {
     private final FetchTools fetchTools;
-    private static LocalDateTime LastUpdate;
 
     public GameService(FetchTools fetchTools) {
         this.fetchTools = fetchTools;
@@ -24,16 +23,16 @@ public class GameService {
 
         List<GameDTO> games = new ArrayList<>();
 
-        //if theres no new games then return early
+        //if there's no new games then return early
         if (amount <= 0) {
             return games;
         }
 
         List<Callable<IgdbGame[]>> tasks = new ArrayList<>();
-        //a page has 500 games so we devide the total amount of games by 500 to get how many pages
+        //a page has 500 games so we divide the total amount of games by 500 to get how many pages
         for (int i = 0; i < amount / 500 + 1; i++) {
-            final int pagenumber = i;
-            tasks.add(() -> fetchPageOfGames(pagenumber, dateAdded));
+            final int pageNumber = i;
+            tasks.add(() -> fetchPageOfGames(pageNumber, dateAdded));
         }
         System.out.println(amount);
         System.out.println(amount / 500 + 1);
@@ -53,7 +52,7 @@ public class GameService {
     private IgdbGame[] fetchPageOfGames(int page, long dateAdded) {
         return fetchTools.postToApi("https://api.igdb.com/v4/games", IgdbGame[].class,
                 HttpRequest.BodyPublishers.ofString(
-                        //page number + todays date as a unix timestamp minus 31 days in seconds
+                        //page number + today's date as a unix timestamp minus 31 days in seconds
                         gamesBody(page, dateAdded)),
                 headerString()
         );
@@ -61,7 +60,6 @@ public class GameService {
 
     //count how many games there are to fetch
     private IgdbCount fetchAmountOfGames(long dateAdded) {
-        AccesTokenService accesTokenService = new AccesTokenService(fetchTools);
         return fetchTools.postToApi("https://api.igdb.com/v4/games/count", IgdbCount.class,
                 HttpRequest.BodyPublishers.ofString(countBody(TimeMapper.unixOf(LocalDateTime.now()) - 2678400, dateAdded)),
                 headerString()
@@ -69,7 +67,7 @@ public class GameService {
     }
 
     private String[] headerString() {
-        AccesTokenService accesTokenService = new AccesTokenService(fetchTools);
+        IgdbAccessTokenService accesTokenService = new IgdbAccessTokenService(fetchTools);
         return new String[]{"Accept", "application/json", "Client-ID", System.getenv("client_id"), "Authorization", "bearer " + accesTokenService.getToken().getAccessToken()};
     }
 

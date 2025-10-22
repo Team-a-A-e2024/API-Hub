@@ -39,7 +39,6 @@ public class FetchTools {
                 System.out.println("GET request failed. Status code: " + response.statusCode());
             }
         } catch (Exception e) {
-            e.printStackTrace();
         }
         return null;
     }
@@ -54,7 +53,7 @@ public class FetchTools {
         ObjectMapper objectMapper = new ObjectMapper(); // Jackson prep
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        AccesTokenService accesTokenService = new AccesTokenService(this);
+        IgdbAccessTokenService accesTokenService = new IgdbAccessTokenService(this);
 
         try {
             HttpClient client = HttpClient.newHttpClient();

@@ -19,7 +19,6 @@ import java.time.temporal.ChronoUnit;
 //todo: we only pull games 30 days back, meaning if theres no update in over 30 days we don't get any game :)
 
 public class IgdbManager {
-    private FetchTools fetchTools;
     private GameService gameService;
     private LocalDateTime LastUpdate;
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
@@ -27,14 +26,11 @@ public class IgdbManager {
     private final static String path = "igdbLog.txt";
 
     public IgdbManager(FetchTools fetchTools) {
-        this.fetchTools = fetchTools;
         gameService = new GameService(fetchTools);
-        start();
     }
 
     public void start() {
         ObjectMapper objectMapper = new ObjectMapper();
-
 
         File file = new File(path);
         try {
@@ -89,6 +85,6 @@ public class IgdbManager {
     @NoArgsConstructor
     @AllArgsConstructor
     private static class UpdateLog {
-        String LastUpdate;
+        private String LastUpdate;
     }
 }
