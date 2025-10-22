@@ -1,28 +1,22 @@
 package dat.security.daos;
 
-
 import dat.security.dtos.UserDTO;
 import dat.security.entities.Role;
 import dat.security.entities.User;
 import dat.security.exceptions.ApiException;
 import dat.security.exceptions.ValidationException;
-import io.javalin.http.Handler;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityNotFoundException;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class SecurityDAO implements ISecurityDAO {
-
     private static ISecurityDAO instance;
     private static EntityManagerFactory emf;
-
     public SecurityDAO(EntityManagerFactory _emf) {
         emf = _emf;
     }
-
     private EntityManager getEntityManager() {
         return emf.createEntityManager();
     }
@@ -119,12 +113,5 @@ public class SecurityDAO implements ISecurityDAO {
             em.getTransaction().commit();
         }
     }
-
-
-
-
-
-
-
 }
 

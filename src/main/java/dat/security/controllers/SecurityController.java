@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.nimbusds.jose.JOSEException;
 import dat.security.entities.Role;
-
 import dat.security.token.ITokenSecurity;
 import dat.security.token.TokenSecurity;
 import dat.utils.Utils;
@@ -26,7 +25,6 @@ import jakarta.persistence.EntityNotFoundException;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.text.ParseException;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -48,7 +46,6 @@ public class SecurityController {
         return instance;
     }
 
-
     public Handler login() {
         return (ctx) -> {
             ObjectNode returnObject = objectMapper.createObjectNode();
@@ -69,7 +66,6 @@ public class SecurityController {
         };
     }
 
-
     public Handler register() {
         return (ctx) -> {
             ObjectNode returnObject = objectMapper.createObjectNode();
@@ -87,7 +83,6 @@ public class SecurityController {
             }
         };
     }
-
 
     public Handler authenticate() throws UnauthorizedResponse {
 
@@ -119,7 +114,6 @@ public class SecurityController {
         };
     }
 
-
     public boolean authorize(UserDTO user, Set<RouteRole> allowedRoles) {
         if (user == null) {
             throw new UnauthorizedResponse("You need to log in, dude!");
@@ -131,7 +125,6 @@ public class SecurityController {
                    .map(String::toUpperCase)
                    .anyMatch(roleNames::contains);
         }
-
 
     public String createToken(UserDTO user) {
         try {
@@ -154,7 +147,6 @@ public class SecurityController {
             throw new ApiException(500, "Could not create token");
         }
     }
-
 
     public UserDTO verifyToken(String token) {
         boolean IS_DEPLOYED = (System.getenv("DEPLOYED") != null);
@@ -230,7 +222,6 @@ public class SecurityController {
             }
         };
     }
-
 
     public Handler deleteUser() {
         return ctx -> {

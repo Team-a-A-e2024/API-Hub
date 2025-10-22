@@ -1,10 +1,8 @@
 package dat.security.entities;
 
-import dk.bugelhartmann.UserDTO;
 import jakarta.persistence.*;
 import lombok.*;
 import org.mindrot.jbcrypt.BCrypt;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.HashSet;
