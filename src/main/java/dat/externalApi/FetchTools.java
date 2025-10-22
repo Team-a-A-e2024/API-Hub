@@ -35,6 +35,7 @@ public class FetchTools {
             if (response.statusCode() == 200) {
                 return objectMapper.readValue(response.body(), dtoClass);
             } else {
+
                 System.out.println("GET request failed. Status code: " + response.statusCode());
             }
         } catch (Exception e) {
@@ -70,7 +71,7 @@ public class FetchTools {
             if (response.statusCode() == 200) {
                 return objectMapper.readValue(response.body(), dtoClass);
             } else {
-                System.out.println("GET request failed. Status code: " + response.statusCode());
+                System.out.println("POST request failed. Status code: " + response.statusCode() + response.body());
             }
         } catch (Exception e) {
             e.printStackTrace();

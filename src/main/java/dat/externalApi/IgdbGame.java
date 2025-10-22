@@ -7,7 +7,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class igdbGame {
+public class IgdbGame {
     private Long id;
     @JsonAlias("first_release_date")
     private Long firstReleaseDate;
