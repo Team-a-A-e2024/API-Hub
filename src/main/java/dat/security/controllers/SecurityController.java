@@ -112,7 +112,8 @@ public class SecurityController {
 
     public boolean authorize(UserDTO user, Set<RouteRole> allowedRoles) {
         if (user == null) {
-            throw new UnauthorizedResponse("You need to log in");}
+            throw new UnauthorizedResponse("You need to log in");
+        }
         Set<String> roleNames = allowedRoles.stream()
                    .map(RouteRole::toString)
                    .collect(Collectors.toSet());
