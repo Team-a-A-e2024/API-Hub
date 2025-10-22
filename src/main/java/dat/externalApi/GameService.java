@@ -1,19 +1,19 @@
 package dat.externalApi;
 
+import dat.entities.Game;
 import dat.utils.TimeMapper;
 
 import java.net.http.HttpRequest;
-import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 public class GameService {
     private final FetchTools fetchTools;
-    private static Token token;
 
     public GameService(FetchTools fetchTools) { this.fetchTools = fetchTools; }
 
@@ -21,12 +21,63 @@ public class GameService {
         List<Game> games = new ArrayList<>();
         List<Callable<igdbGame[]>> tasks = new ArrayList<>();
 
+        //if theres no new games then return early
         int amount = fetchNewGamesCount().getCount();
-
-        for(int i = 0; i > amount/500; i++){
-
+        if (amount <=0){
+            return games;
         }
 
+        for(int i = 0; i < amount/500 + 1; i++){
+            final int pagenumber = i;
+            tasks.add(()-> fetchNewGames(pagenumber));
+        }
+        List<igdbGame[]> toProcess = fetchTools.getFromApiList(tasks);
+
+        for(igdbGame[] igdbGames : toProcess){
+            for (igdbGame igdbGame : igdbGames){
+                LocalDate release = null;
+                if(igdbGame.getFirstReleaseDate() != null){
+                    release = Instant.ofEpochSecond(igdbGame.getFirstReleaseDate())
+                            .atZone(ZoneId.systemDefault()).toLocalDate();
+                }
+
+                games.add(Game.builder()
+                        .name(igdbGame.getName())
+                        .firstReleaseDate(release)
+                        .summary(igdbGame.getSummary())
+                        .build());
+            }
+        }
+        return games;
+    }
+
+    public List<Game> getGames(){
+        List<Game> games = new ArrayList<>();
+        List<Callable<igdbGame[]>> tasks = new ArrayList<>();
+
+        //if theres no new games then return early
+        int amount = fetchGamesCount().getCount();
+        if (amount <=0){
+            return games;
+        }
+
+        for(int i = 0; i < amount/500 + 1; i++){
+            final int pagenumber = i;
+            tasks.add(()-> fetchGames(pagenumber));
+        }
+        List<igdbGame[]> toProcess = fetchTools.getFromApiList(tasks);
+
+        for(igdbGame[] igdbGames : toProcess){
+            for (igdbGame igdbGame : igdbGames){
+                games.add(Game.builder()
+                        .name(igdbGame.getName())
+                        .firstReleaseDate(Instant
+                                .ofEpochSecond(igdbGame.getFirstReleaseDate())
+                                .atZone(ZoneId.systemDefault()).toLocalDate())
+                        .summary(igdbGame.getSummary())
+                        .build());
+            }
+        }
         return games;
     }
 
@@ -57,10 +108,10 @@ public class GameService {
     }
 
     //count how many games there are to fetch
-    private igdbCount fetchgamesCount() {
+    private igdbCount fetchGamesCount() {
         AccesTokenService accesTokenService = new AccesTokenService(fetchTools);
 
-        return fetchTools.postToApi(gamesUri(), igdbCount.class,
+        return fetchTools.postToApi("https://api.igdb.com/v4/games/count", igdbCount.class,
                 HttpRequest.BodyPublishers.ofString("where first_release_date > " + (TimeMapper.unixOf(LocalDateTime.now()) - 2678400) + "; "),
                 new String[] {"Accept", "application/json", "Client-ID",System.getenv("client_id"),"Authorization","bearer " + accesTokenService.getToken().getAccessToken()}
         );
@@ -70,7 +121,7 @@ public class GameService {
     private igdbCount fetchNewGamesCount() {
         AccesTokenService accesTokenService = new AccesTokenService(fetchTools);
 
-        return fetchTools.postToApi(gamesUri(), igdbCount.class,
+        return fetchTools.postToApi("https://api.igdb.com/v4/games/count", igdbCount.class,
                 HttpRequest.BodyPublishers.ofString("where first_release_date > " + (TimeMapper.unixOf(LocalDateTime.now()) - 2678400) + "; " +
                         "where created_at > " + (TimeMapper.unixOf(LocalDateTime.now()) - 86400) + ";"),
                 new String[] {"Accept", "application/json", "Client-ID",System.getenv("client_id"),"Authorization","bearer " + accesTokenService.getToken().getAccessToken()}

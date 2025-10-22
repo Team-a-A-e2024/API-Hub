@@ -103,7 +103,7 @@ public class FetchTools {
         return responses;
     }
 
-    public <T> List<T> getFromApiList(List<Callable<T>> tasks, Class<T> dto) {
+    public <T> List<T> getFromApiList(List<Callable<T>> tasks) {
         List<T> responses = new ArrayList<>();
         ExecutorService executorService = createThreadPool(tasks.size());
 
@@ -118,7 +118,6 @@ public class FetchTools {
         } finally {
             executorService.shutdown();
         }
-
         return responses;
     }
 
