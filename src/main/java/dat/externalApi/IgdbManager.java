@@ -1,6 +1,5 @@
 package dat.externalApi;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dat.daos.impl.GameDAO;
 import dat.utils.TimeMapper;
@@ -15,6 +14,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
+//todo: update path
+//todo: fix rate limit issues
+//todo: we only pull games 30 days back, meaning if theres no update in over 30 days we don't get any game :)
 
 public class IgdbManager {
     private FetchTools fetchTools;
@@ -44,14 +46,13 @@ public class IgdbManager {
             }
         } catch (IOException e) {
             System.out.println("error while reading file");
-            e.printStackTrace();
         }
 
         //should only run if file wasn't read as it gets everything
         if (LastUpdate == null) {
             gameService.getGames(0L).forEach(GameDAO.getInstance()::create);
         } else {
-            //gameService.getGames(TimeMapper.unixOf(LastUpdate)).forEach(GameDAO.getInstance()::create);
+            gameService.getGames(TimeMapper.unixOf(LastUpdate)).forEach(GameDAO.getInstance()::create);
         }
 
         //replace file with new one
@@ -65,6 +66,9 @@ public class IgdbManager {
     }
 
     public void update() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
         //if there hasn't been an update for 24 hours.
         if (LastUpdate.until(LocalDateTime.now(), ChronoUnit.SECONDS) > 28.800) {
             //gets every added game since last update
