@@ -6,7 +6,7 @@
 
 ## Authors
 **Project**: API-Hub <br>
-**Course**: Datamatiker 2. semester <br>
+**Course**: Datamatiker 3. semester <br>
 **Education**: CPH Business Lyngby <br>
 
 **Name**: Abbas M. Badreddine <br>

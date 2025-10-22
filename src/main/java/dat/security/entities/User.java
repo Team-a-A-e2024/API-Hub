@@ -3,7 +3,6 @@ package dat.security.entities;
 import jakarta.persistence.*;
 import lombok.*;
 import org.mindrot.jbcrypt.BCrypt;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.HashSet;
@@ -23,9 +22,13 @@ public class User implements Serializable, ISecurityUser {
     private static final long serialVersionUID = 1L;
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
     @Basic(optional = false)
     @Column(name = "username", length = 25)
     private String username;
+    
     @Basic(optional = false)
     @Column(name = "password")
     private String password;
