@@ -43,6 +43,42 @@ public class FetchTools {
         return null;
     }
 
+
+    public <T> T postToApi(String uri, Class<T> dtoClass) {
+        return postToApi(uri,dtoClass, HttpRequest.BodyPublishers.noBody(),new String[] {"Accept", "application/json"});
+    }
+
+    public <T> T postToApi(String uri, Class<T> dtoClass, HttpRequest.BodyPublisher body,String[] headers) {
+
+        ObjectMapper objectMapper = new ObjectMapper(); // Jackson prep
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        AccesTokenService accesTokenService = new AccesTokenService(this);
+
+        try {
+            HttpClient client = HttpClient.newHttpClient();
+
+            HttpRequest request = HttpRequest
+                    .newBuilder()
+                    .headers(headers)
+                    .uri(new URI(uri))
+                    .POST(body)
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+                return objectMapper.readValue(response.body(), dtoClass);
+            } else {
+                System.out.println("GET request failed. Status code: " + response.statusCode());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
     public <T> List<T> getFromApiList(List<String> endpoints, Class<T> dto) {
         List<T> responses = new ArrayList<>();
         List<Callable<T>> tasks = new ArrayList<>();
@@ -67,33 +103,23 @@ public class FetchTools {
         return responses;
     }
 
-    public <T> T postToApi(String uri, Class<T> dtoClass) {
-
-        ObjectMapper objectMapper = new ObjectMapper(); // Jackson prep
-        objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    public <T> List<T> getFromApiList(List<Callable<T>> tasks, Class<T> dto) {
+        List<T> responses = new ArrayList<>();
+        ExecutorService executorService = createThreadPool(tasks.size());
 
         try {
-            HttpClient client = HttpClient.newHttpClient();
+            List<Future<T>> futures = executorService.invokeAll(tasks);
 
-            HttpRequest request = HttpRequest
-                    .newBuilder()
-                    .header("Accept", "application/json")
-                    .uri(new URI(uri))
-                    .POST(HttpRequest.BodyPublishers.noBody())
-                    .build();
-
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            if (response.statusCode() == 200) {
-                return objectMapper.readValue(response.body(), dtoClass);
-            } else {
-                System.out.println("GET request failed. Status code: " + response.statusCode());
+            for (Future<T> future : futures) {
+                responses.add(future.get());
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        } finally {
+            executorService.shutdown();
         }
-        return null;
+
+        return responses;
     }
 
     private static ExecutorService createThreadPool(int threadPoolSize) {
