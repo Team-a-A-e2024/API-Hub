@@ -24,9 +24,13 @@ public class User implements Serializable, ISecurityUser {
     private static final long serialVersionUID = 1L;
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
     @Basic(optional = false)
     @Column(name = "username", length = 25)
     private String username;
+    
     @Basic(optional = false)
     @Column(name = "password")
     private String password;
@@ -66,6 +70,16 @@ public class User implements Serializable, ISecurityUser {
         }
         roles.add(role);
         role.getUsers().add(this);
+    }
+
+    public void removeRole(String userRole) {
+        roles.stream()
+                .filter(role -> role.getRoleName().equals(userRole))
+                .findFirst()
+                .ifPresent(role -> {
+                    roles.remove(role);
+                    role.getUsers().remove(this);
+                });
     }
 }
 

@@ -1,11 +1,11 @@
 package dat.security.daos;
 
 
+import dat.security.dtos.UserDTO;
 import dat.security.entities.Role;
 import dat.security.entities.User;
 import dat.security.exceptions.ApiException;
 import dat.security.exceptions.ValidationException;
-import dk.bugelhartmann.UserDTO;
 import io.javalin.http.Handler;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityManager;

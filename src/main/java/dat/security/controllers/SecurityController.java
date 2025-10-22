@@ -4,6 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.nimbusds.jose.JOSEException;
 import dat.security.entities.Role;
+
+import dat.security.token.ITokenSecurity;
+import dat.security.token.TokenSecurity;
 import dat.utils.Utils;
 import dat.config.HibernateConfig;
 import dat.security.daos.ISecurityDAO;
@@ -12,9 +15,7 @@ import dat.security.entities.User;
 import dat.security.exceptions.ApiException;
 import dat.security.exceptions.NotAuthorizedException;
 import dat.security.exceptions.ValidationException;
-import dk.bugelhartmann.ITokenSecurity;
-import dk.bugelhartmann.TokenSecurity;
-import dk.bugelhartmann.UserDTO;
+import dat.security.dtos.UserDTO;
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
 import io.javalin.http.HttpStatus;
@@ -30,7 +31,7 @@ import java.text.ParseException;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class SecurityController implements ISecurityController {
+public class SecurityController {
     ObjectMapper objectMapper = new ObjectMapper();
     ITokenSecurity tokenSecurity = new TokenSecurity();
     private static ISecurityDAO securityDAO;
@@ -47,7 +48,7 @@ public class SecurityController implements ISecurityController {
         return instance;
     }
 
-    @Override
+
     public Handler login() {
         return (ctx) -> {
             ObjectNode returnObject = objectMapper.createObjectNode();
@@ -68,7 +69,7 @@ public class SecurityController implements ISecurityController {
         };
     }
 
-    @Override
+
     public Handler register() {
         return (ctx) -> {
             ObjectNode returnObject = objectMapper.createObjectNode();
@@ -87,7 +88,7 @@ public class SecurityController implements ISecurityController {
         };
     }
 
-    @Override
+
     public Handler authenticate() throws UnauthorizedResponse {
 
         ObjectNode returnObject = objectMapper.createObjectNode();
@@ -118,7 +119,7 @@ public class SecurityController implements ISecurityController {
         };
     }
 
-    @Override
+
     public boolean authorize(UserDTO user, Set<RouteRole> allowedRoles) {
         if (user == null) {
             throw new UnauthorizedResponse("You need to log in, dude!");
@@ -131,7 +132,7 @@ public class SecurityController implements ISecurityController {
                    .anyMatch(roleNames::contains);
         }
 
-    @Override
+
     public String createToken(UserDTO user) {
         try {
             String ISSUER;
@@ -154,7 +155,7 @@ public class SecurityController implements ISecurityController {
         }
     }
 
-    @Override
+
     public UserDTO verifyToken(String token) {
         boolean IS_DEPLOYED = (System.getenv("DEPLOYED") != null);
         String SECRET = IS_DEPLOYED ? System.getenv("SECRET_KEY") : Utils.getPropertyValue("SECRET_KEY", "config.properties");
@@ -187,12 +188,15 @@ public class SecurityController implements ISecurityController {
 
     public Handler getUserByUsername() {
         return ctx -> {
-            String username = ctx.pathParam("id");
+            String username = ctx.pathParam("id"); // {id} i URL'en = username
             try {
                 User user = securityDAO.getUserByUsername(username);
                 UserDTO dto = new UserDTO(
+                        user.getId(),
                         user.getUsername(),
-                        user.getRoles().stream().map(Role::getRoleName).collect(Collectors.toSet())
+                        user.getRoles().stream()
+                                .map(Role::getRoleName)
+                                .collect(Collectors.toSet())
                 );
                 ctx.status(200).json(dto);
             } catch (EntityNotFoundException e) {
@@ -212,6 +216,7 @@ public class SecurityController implements ISecurityController {
                 }
                 User updatedUser = securityDAO.editUser(userDTO);
                 UserDTO dto = new UserDTO(
+                        updatedUser.getId(),
                         updatedUser.getUsername(),
                         updatedUser.getRoles().stream()
                                 .map(Role::getRoleName)
