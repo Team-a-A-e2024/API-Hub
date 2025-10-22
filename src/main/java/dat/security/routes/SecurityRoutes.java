@@ -17,7 +17,7 @@ public class SecurityRoutes {
             path("/auth", ()->{
                 get("/healthcheck", securityController::healthCheck, Role.ANYONE);
                 get("/test", ctx->ctx.json(jsonMapper.createObjectNode().put("msg",  "Hello World!")), Role.ANYONE);
-                get("/user/{id}", securityController.getUserByUsername(), Role.ADMIN);
+                get("/user/{id}", securityController.getUserByUsername(), Role.ANYONE);
                 post("/login", securityController.login(), Role.ANYONE);
                 post("/register", securityController.register(), Role.ANYONE);
                 post("/user/role", securityController.addRole(), Role.USER);
