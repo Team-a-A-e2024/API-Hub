@@ -53,11 +53,9 @@ public class SecurityController {
                 UserDTO user = ctx.bodyAsClass(UserDTO.class);
                 UserDTO verifiedUser = securityDAO.getVerifiedUser(user.getUsername(), user.getPassword());
                 String token = createToken(verifiedUser);
-
                 ctx.status(200).json(returnObject
                         .put("token", token)
                         .put("username", verifiedUser.getUsername()));
-
             } catch (EntityNotFoundException | ValidationException e) {
                 ctx.status(401);
                 System.out.println(e.getMessage());
@@ -85,10 +83,8 @@ public class SecurityController {
     }
 
     public Handler authenticate() throws UnauthorizedResponse {
-
         ObjectNode returnObject = objectMapper.createObjectNode();
         return (ctx) -> {
-
             if (ctx.method().toString().equals("OPTIONS")) {
                 ctx.status(200);
                 return;
@@ -116,8 +112,7 @@ public class SecurityController {
 
     public boolean authorize(UserDTO user, Set<RouteRole> allowedRoles) {
         if (user == null) {
-            throw new UnauthorizedResponse("You need to log in, dude!");
-        }
+            throw new UnauthorizedResponse("You need to log in");}
         Set<String> roleNames = allowedRoles.stream()
                    .map(RouteRole::toString)
                    .collect(Collectors.toSet());
@@ -131,7 +126,6 @@ public class SecurityController {
             String ISSUER;
             String TOKEN_EXPIRE_TIME;
             String SECRET_KEY;
-
             if (System.getenv("DEPLOYED") != null) {
                 ISSUER = System.getenv("ISSUER");
                 TOKEN_EXPIRE_TIME = System.getenv("TOKEN_EXPIRE_TIME");
@@ -151,7 +145,6 @@ public class SecurityController {
     public UserDTO verifyToken(String token) {
         boolean IS_DEPLOYED = (System.getenv("DEPLOYED") != null);
         String SECRET = IS_DEPLOYED ? System.getenv("SECRET_KEY") : Utils.getPropertyValue("SECRET_KEY", "config.properties");
-
         try {
             if (tokenSecurity.tokenIsValid(token, SECRET) && tokenSecurity.tokenNotExpired(token)) {
                 return tokenSecurity.getUserWithRolesFromToken(token);
