@@ -222,6 +222,13 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.0.0</version>
             </plugin>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.5</version>
+                <configuration>
+                    <excludedGroups>IntegrationTest</excludedGroups>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
