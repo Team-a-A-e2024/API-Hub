@@ -1,5 +1,6 @@
 package dat.config;
 
+import dat.entities.Game;
 import dat.security.entities.Role;
 import dat.security.entities.User;
 import dat.utils.Utils;
@@ -43,6 +44,7 @@ public class HibernateConfig {
     private static void getAnnotationConfiguration(Configuration configuration) {
         configuration.addAnnotatedClass(User.class);
         configuration.addAnnotatedClass(Role.class);
+        configuration.addAnnotatedClass(Game.class);
     }
 
     private static EntityManagerFactory createEMF(boolean forTest) {
@@ -98,6 +100,7 @@ public class HibernateConfig {
         props.put("hibernate.connection.url", "jdbc:postgresql://localhost:5432/" + DBName);
         props.put("hibernate.connection.username", "postgres");
         props.put("hibernate.connection.password", "postgres");
+        props.put("hibernate.hbm2ddl.auto", "create");
         return props;
     }
 
