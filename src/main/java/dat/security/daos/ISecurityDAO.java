@@ -9,6 +9,7 @@ public interface ISecurityDAO {
     User createUser(String username, String password);
     User addRole(UserDTO user, String newRole);
     User getUserByUsername(String username);
+    User getUserById(Integer id);
     User editUser(UserDTO userDTO);
-    void deleteUser(String username);
+    void deleteUser(Integer id);
 }
