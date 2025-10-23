@@ -16,6 +16,8 @@
         <restassured.version>5.5.0</restassured.version>
         <testcontainers.version>1.18.0</testcontainers.version>
         <junit.version>5.9.1</junit.version>
+        <mockito-core.version>5.14.2</mockito-core.version>
+        <mockito-junit-jupier.version>5.14.2</mockito-junit-jupier.version>
         <jbcrypt.version>0.4</jbcrypt.version>
         <token.security.version>1.0.1</token.security.version>
 
@@ -120,6 +122,18 @@
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-params</artifactId>
             <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${mockito-core.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>${mockito-junit-jupier.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
