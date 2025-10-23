@@ -81,7 +81,6 @@ public class SecurityDAO implements ISecurityDAO {
     @Override
     public User addRole(User user, String newRole) {
         try (EntityManager em = getEntityManager()) {
-            user = getUserByUsername(user.getUsername());
             if (user == null)
                 throw new EntityNotFoundException("No user found with username: " + user.getUsername());
             em.getTransaction().begin();
@@ -98,8 +97,8 @@ public class SecurityDAO implements ISecurityDAO {
 
     public User editUser(User user) {
         try (EntityManager em = getEntityManager()) {
-            user = em.find(User.class, user.getId());
-            if (user == null) {
+            User checkedUser = em.find(User.class, user.getId());
+            if (checkedUser == null) {
                 throw new EntityNotFoundException("No user found with user with id: " + user.getId());
             }
             em.getTransaction().begin();
