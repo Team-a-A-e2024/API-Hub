@@ -1,4 +1,4 @@
-package dat.externalApi;
+package dat.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -48,12 +48,11 @@ public class FetchTools {
         return postToApi(uri,dtoClass, HttpRequest.BodyPublishers.noBody(),new String[] {"Accept", "application/json"});
     }
 
-    public <T> T postToApi(String uri, Class<T> dtoClass, HttpRequest.BodyPublisher body,String[] headers) {
+    public <T> T postToApi(String uri, Class<T> dtoClass, HttpRequest.BodyPublisher body, String[] headers) {
 
         ObjectMapper objectMapper = new ObjectMapper(); // Jackson prep
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        IgdbAccessTokenService accesTokenService = new IgdbAccessTokenService(this);
 
         try {
             HttpClient client = HttpClient.newHttpClient();
@@ -73,7 +72,6 @@ public class FetchTools {
                 System.out.println("POST request failed. Status code: " + response.statusCode() + response.body());
             }
         } catch (Exception e) {
-            e.printStackTrace();
         }
         return null;
     }
@@ -120,6 +118,7 @@ public class FetchTools {
         }
         return responses;
     }
+
 
     private static ExecutorService createThreadPool(int threadPoolSize) {
         int cores = Runtime.getRuntime().availableProcessors();

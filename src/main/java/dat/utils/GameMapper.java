@@ -1,8 +1,7 @@
 package dat.utils;
 
 import dat.dtos.GameDTO;
-import dat.entities.Game;
-import dat.externalApi.IgdbGame;
+import dat.dtos.IgdbGame;
 
 import java.time.Instant;
 import java.time.LocalDate;

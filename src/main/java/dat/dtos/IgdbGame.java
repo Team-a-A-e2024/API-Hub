@@ -1,4 +1,4 @@
-package dat.externalApi;
+package dat.dtos;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import lombok.*;
@@ -7,6 +7,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode
 public class IgdbGame {
     private Long id;
     @JsonAlias("first_release_date")

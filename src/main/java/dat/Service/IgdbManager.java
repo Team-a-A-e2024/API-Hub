@@ -1,4 +1,4 @@
-package dat.externalApi;
+package dat.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dat.daos.impl.GameDAO;
@@ -13,19 +13,25 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-
-//todo: update path
-//todo: fix rate limit issues
-//todo: we only pull games 30 days back, meaning if theres no update in over 30 days we don't get any game :)
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class IgdbManager {
+    private static IgdbManager instance;
     private GameService gameService;
-    private LocalDateTime LastUpdate;
+    private static LocalDateTime LastUpdate;
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-    //todo: update path
-    private final static String path = "igdbLog.txt";
+    private static final  String path = "logs/igdbApiPull-Log.txt";
 
-    public IgdbManager(FetchTools fetchTools) {
+    private IgdbManager() {}
+
+    public static IgdbManager getInstance() {
+        if (instance == null) instance = new IgdbManager();
+        return instance;
+    }
+
+    public void setFetchTools(FetchTools fetchTools){
         gameService = new GameService(fetchTools);
     }
 
@@ -60,8 +66,13 @@ public class IgdbManager {
         } catch (IOException e) {
             System.out.println("error while writing to file");
         }
+
+        //creates a thread that runs once a day
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+        scheduler.scheduleAtFixedRate(this::update, 0, 1, TimeUnit.DAYS);
     }
 
+    //todo: we only pull games 30 days back, meaning if theres no update in over 30 days we don't get any game :)
     public void update() {
         ObjectMapper objectMapper = new ObjectMapper();
 

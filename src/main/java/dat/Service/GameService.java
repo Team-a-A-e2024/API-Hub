@@ -1,8 +1,13 @@
-package dat.externalApi;
+package dat.Service;
 
 import dat.dtos.GameDTO;
+import dat.dtos.IgdbGame;
 import dat.utils.GameMapper;
 import dat.utils.TimeMapper;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.net.http.HttpRequest;
 import java.time.LocalDateTime;
@@ -17,7 +22,7 @@ public class GameService {
         this.fetchTools = fetchTools;
     }
 
-
+    //todo: fix rate limit issues
     public List<GameDTO> getGames(final Long dateAdded) {
         int amount = fetchAmountOfGames(dateAdded).getCount();
 
@@ -34,6 +39,7 @@ public class GameService {
             final int pageNumber = i;
             tasks.add(() -> fetchPageOfGames(pageNumber, dateAdded));
         }
+
         System.out.println(amount);
         System.out.println(amount / 500 + 1);
         List<IgdbGame[]> toProcess = fetchTools.getFromApiList(tasks);
@@ -49,7 +55,7 @@ public class GameService {
     }
 
     //page starts from index 0, dateAdded fetches from that day going forward
-    private IgdbGame[] fetchPageOfGames(int page, long dateAdded) {
+    public IgdbGame[] fetchPageOfGames(int page, long dateAdded) {
         return fetchTools.postToApi("https://api.igdb.com/v4/games", IgdbGame[].class,
                 HttpRequest.BodyPublishers.ofString(
                         //page number + today's date as a unix timestamp minus 31 days in seconds
@@ -59,7 +65,7 @@ public class GameService {
     }
 
     //count how many games there are to fetch
-    private IgdbCount fetchAmountOfGames(long dateAdded) {
+    public IgdbCount fetchAmountOfGames(long dateAdded) {
         return fetchTools.postToApi("https://api.igdb.com/v4/games/count", IgdbCount.class,
                 HttpRequest.BodyPublishers.ofString(countBody(TimeMapper.unixOf(LocalDateTime.now()) - 2678400, dateAdded)),
                 headerString()
@@ -81,7 +87,19 @@ public class GameService {
                 "sort first_release_date asc;\n" +
                 "limit 500;\n" +
                 "offset " + (500 * page) + ";\n" +
+                //today minus 31 days
                 "where first_release_date > " + (TimeMapper.unixOf(LocalDateTime.now()) - 2678400) + " & \n" +
-                "created_at > " + dateAdded + ";";
+                "created_at > " + dateAdded + ";" +
+                //today minus 31 days
+                "where first_release_date > " + (TimeMapper.unixOf(LocalDateTime.now()) - 2678400) + " & \n" +
+                "updated_at > " + dateAdded + ";";
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class IgdbCount {
+        private int count;
     }
 }
