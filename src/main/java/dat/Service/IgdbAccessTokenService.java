@@ -16,7 +16,7 @@ public class IgdbAccessTokenService {
 
     public Token getToken(){
         if (token != null){
-            //if the time it takes to expire is greater than the time from creation until now minus 1 hour in seconds,
+            //if the time it takes to expire is greater than the time from creation until now plus 1 hour in seconds,
             //then the token is valid, and we can keep using it
             if(token.getExpires_in() > token.getCreatedAt().until(LocalDateTime.now(), ChronoUnit.SECONDS) + 3600 ){
                 return token;

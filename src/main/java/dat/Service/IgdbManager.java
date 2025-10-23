@@ -1,7 +1,6 @@
 package dat.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dat.config.ApplicationConfig;
 import dat.daos.impl.GameDAO;
 import dat.utils.TimeMapper;
 import lombok.AllArgsConstructor;
@@ -21,7 +20,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class IgdbManager {
-    private static Logger logger = LoggerFactory.getLogger(IgdbManager.class);
+    private final static Logger logger = LoggerFactory.getLogger(IgdbManager.class);
     private static IgdbManager instance;
     private IgdbGameService gameService;
     private static LocalDateTime LastUpdate;
@@ -40,6 +39,7 @@ public class IgdbManager {
     }
 
     public void start() {
+        logger.info("running startup igdb api fetching");
         ObjectMapper objectMapper = new ObjectMapper();
 
         File file = new File(path);
@@ -70,6 +70,7 @@ public class IgdbManager {
             logger.info("success writing to file");
         } catch (IOException e) {
             logger.error("error while writing to file");
+            logger.error("please resolve as quickly as possible");
         }
 
         //creates a thread that runs once a day
@@ -79,6 +80,7 @@ public class IgdbManager {
 
     //todo: we only pull games 30 days back, meaning if theres no update in over 30 days we don't get any game :)
     public void update() {
+        logger.info("running igdb fetch update");
         ObjectMapper objectMapper = new ObjectMapper();
 
         //if there hasn't been an update for 24 hours.
@@ -92,6 +94,7 @@ public class IgdbManager {
                 logger.info("success writing to file");
             } catch (IOException e) {
                 logger.error("error while writing to file");
+                logger.error("please resolve as quickly as possible");
             }
         }
     }
