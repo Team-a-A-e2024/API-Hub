@@ -163,7 +163,7 @@ public class SecurityController {
             ObjectNode returnObject = objectMapper.createObjectNode();
             try {
                 String newRole = ctx.bodyAsClass(ObjectNode.class).get("role").asText();
-                UserDTO user = ctx.attribute("user");
+                User user = ctx.attribute("user");
                 User updatedUser = securityDAO.addRole(user, newRole);
                 ctx.status(200).json(returnObject.put("msg", "Role " + newRole + " added to user"));
             } catch (EntityNotFoundException e) {
@@ -213,13 +213,13 @@ public class SecurityController {
     public Handler editUser() {
         return ctx -> {
             String id = ctx.pathParam("id");
-            UserDTO userDTO = ctx.bodyAsClass(UserDTO.class);
+            User user = ctx.bodyAsClass(User.class);
             ObjectNode returnObject = objectMapper.createObjectNode();
-            User user = securityDAO.getUserById(Integer.parseInt(id));
+            User username= securityDAO.getUserById(Integer.parseInt(id));
             UserDTO dto = new UserDTO();
             try {
-                if (!user.verifyPassword(userDTO.getPassword())) {
-                    User updatedUser = securityDAO.editUser(userDTO);
+                if (!username.verifyPassword(username.getPassword())) {
+                    User updatedUser = securityDAO.editUser(username);
                     dto = new UserDTO(
                             updatedUser.getId(),
                             updatedUser.getUsername(),

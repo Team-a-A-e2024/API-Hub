@@ -64,7 +64,10 @@ public class SecurityDAO implements ISecurityDAO {
                     .getResultStream()
                     .findFirst()
                     .orElseGet(() -> new Role("user"));
-            em.persist(userRole); // sikrer at rollen eksisterer
+            if(userRole == null) {
+                userRole = new Role("user");
+                em.persist(userRole);
+            }
             userEntity.addRole(userRole);
             em.persist(userEntity);
             em.getTransaction().commit();
@@ -76,11 +79,11 @@ public class SecurityDAO implements ISecurityDAO {
     }
 
     @Override
-    public User addRole(UserDTO userDTO, String newRole) {
+    public User addRole(User user, String newRole) {
         try (EntityManager em = getEntityManager()) {
-            User user = getUserByUsername(userDTO.getUsername());
+            user = getUserByUsername(user.getUsername());
             if (user == null)
-                throw new EntityNotFoundException("No user found with username: " + userDTO.getUsername());
+                throw new EntityNotFoundException("No user found with username: " + user.getUsername());
             em.getTransaction().begin();
             Role role = em.find(Role.class, newRole);
             if (role == null) {
@@ -93,14 +96,14 @@ public class SecurityDAO implements ISecurityDAO {
         }
     }
 
-    public User editUser(UserDTO userDTO) {
+    public User editUser(User user) {
         try (EntityManager em = getEntityManager()) {
-            User user = em.find(User.class, userDTO.getId());
+            user = em.find(User.class, user.getId());
             if (user == null) {
-                throw new EntityNotFoundException("No user found with user with id: " + userDTO.getId());
+                throw new EntityNotFoundException("No user found with user with id: " + user.getId());
             }
             em.getTransaction().begin();
-            user.setPassword(userDTO.getPassword());
+            user.setPassword(user.getPassword());
             em.merge(user);
             em.getTransaction().commit();
             return user;
