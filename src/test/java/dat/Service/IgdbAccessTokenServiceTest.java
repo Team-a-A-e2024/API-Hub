@@ -1,5 +1,6 @@
 package dat.Service;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -12,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@Tag("IntegrationTest")
 class IgdbAccessTokenServiceTest {
     @Mock
     private FetchTools fetchTools;

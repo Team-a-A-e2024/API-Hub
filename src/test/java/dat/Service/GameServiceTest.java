@@ -2,6 +2,7 @@ package dat.Service;
 
 import dat.dtos.GameDTO;
 import dat.dtos.IgdbGame;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -18,12 +19,13 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@Tag("IntegrationTest")
 class GameServiceTest {
     @Mock
     private FetchTools fetchTools;
 
     @InjectMocks
-    private GameService gameService;
+    private IgdbGameService gameService;
 
     @Test
     void fetchPageOfGames() {
@@ -52,10 +54,10 @@ class GameServiceTest {
     @Test
     void fetchCountOfGames() {
         // Arrange
-        GameService.IgdbCount expected = new GameService.IgdbCount();
+        IgdbGameService.IgdbCount expected = new IgdbGameService.IgdbCount();
         when(fetchTools.postToApi(
                         anyString(),
-                        eq(GameService.IgdbCount.class),
+                        eq(IgdbGameService.IgdbCount.class),
                         any(HttpRequest.BodyPublisher.class),
                         any(String[].class)
                 )
@@ -67,7 +69,7 @@ class GameServiceTest {
         )).thenReturn(IgdbAccessTokenService.Token.builder().expires_in(0L).createdAt(LocalDateTime.now()).build());
 
         // Act
-        GameService.IgdbCount actual = gameService.fetchAmountOfGames(0);
+        IgdbGameService.IgdbCount actual = gameService.fetchAmountOfGames(0);
 
         // Assert
         assertEquals(expected, actual);
@@ -84,9 +86,9 @@ class GameServiceTest {
                 any(List.class)
         )).thenReturn(Arrays.asList(new IgdbGame[][]{new IgdbGame[]{new IgdbGame()},new IgdbGame[]{new IgdbGame()}}));
 
-        GameService gs = spy(gameService);
+        IgdbGameService gs = spy(gameService);
 
-        doReturn(new GameService.IgdbCount(501))
+        doReturn(new IgdbGameService.IgdbCount(501))
                 .when(gs).fetchAmountOfGames(anyLong());
 
         // Act

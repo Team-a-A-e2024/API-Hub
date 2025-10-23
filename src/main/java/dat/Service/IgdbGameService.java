@@ -15,10 +15,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-public class GameService {
+public class IgdbGameService {
     private final FetchTools fetchTools;
 
-    public GameService(FetchTools fetchTools) {
+    public IgdbGameService(FetchTools fetchTools) {
         this.fetchTools = fetchTools;
     }
 

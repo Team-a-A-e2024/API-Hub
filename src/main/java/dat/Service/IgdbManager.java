@@ -1,12 +1,15 @@
 package dat.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dat.config.ApplicationConfig;
 import dat.daos.impl.GameDAO;
 import dat.utils.TimeMapper;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,8 +21,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class IgdbManager {
+    private static Logger logger = LoggerFactory.getLogger(IgdbManager.class);
     private static IgdbManager instance;
-    private GameService gameService;
+    private IgdbGameService gameService;
     private static LocalDateTime LastUpdate;
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
     private static final  String path = "logs/igdbApiPull-Log.txt";
@@ -32,7 +36,7 @@ public class IgdbManager {
     }
 
     public void setFetchTools(FetchTools fetchTools){
-        gameService = new GameService(fetchTools);
+        gameService = new IgdbGameService(fetchTools);
     }
 
     public void start() {
@@ -43,12 +47,13 @@ public class IgdbManager {
             if (file.exists()) {
                 UpdateLog ul = objectMapper.readValue(file, UpdateLog.class);
                 LastUpdate = LocalDateTime.parse(ul.getLastUpdate(), formatter);
-                System.out.println("success while reading file");
+                logger.info("success while reading file");
             } else {
-                System.out.println("file not found");
+                logger.error("file not found");
+
             }
         } catch (IOException e) {
-            System.out.println("error while reading file");
+            logger.error("error while reading file");
         }
 
         //should only run if file wasn't read as it gets everything
@@ -62,9 +67,9 @@ public class IgdbManager {
         try {
             LastUpdate = LocalDateTime.now();
             objectMapper.writeValue(new File(path), new UpdateLog(LastUpdate.format(formatter)));
-            System.out.println("success while writing to file");
+            logger.info("success writing to file");
         } catch (IOException e) {
-            System.out.println("error while writing to file");
+            logger.error("error while writing to file");
         }
 
         //creates a thread that runs once a day
@@ -84,9 +89,9 @@ public class IgdbManager {
             try {
                 LastUpdate = LocalDateTime.now();
                 objectMapper.writeValue(new File(path), new UpdateLog(LastUpdate.format(formatter)));
-                System.out.println("success while writing to file");
+                logger.info("success writing to file");
             } catch (IOException e) {
-                System.out.println("error while writing to file");
+                logger.error("error while writing to file");
             }
         }
     }

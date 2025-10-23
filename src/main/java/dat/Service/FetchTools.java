@@ -3,6 +3,8 @@ package dat.Service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -13,9 +15,9 @@ import java.util.List;
 import java.util.concurrent.*;
 
 public class FetchTools {
+    private static Logger logger = LoggerFactory.getLogger(FetchTools.class);
 
     public <T> T getFromApi(String uri, Class<T> dtoClass) {
-
         ObjectMapper objectMapper = new ObjectMapper(); // Jackson prep
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
@@ -39,6 +41,7 @@ public class FetchTools {
                 System.out.println("GET request failed. Status code: " + response.statusCode());
             }
         } catch (Exception e) {
+            logger.error("exception during GET request:" + e.getMessage());
         }
         return null;
     }
@@ -72,6 +75,7 @@ public class FetchTools {
                 System.out.println("POST request failed. Status code: " + response.statusCode() + response.body());
             }
         } catch (Exception e) {
+            logger.error("exception during POST request:" + e.getMessage());
         }
         return null;
     }
@@ -97,7 +101,6 @@ public class FetchTools {
         } finally {
             executorService.shutdown();
         }
-
         return responses;
     }
 
