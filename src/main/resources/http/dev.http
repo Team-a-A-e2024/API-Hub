@@ -60,7 +60,7 @@ Accept: application/json
 Authorization: Bearer {{jwt_token}}
 
 ### Add admin role to user
-POST {{url}}/auth/user/role/
+POST {{url}}/auth/user/addrole/
 Accept: application/json
 Authorization: Bearer {{jwt_token}}
 
@@ -68,4 +68,19 @@ Authorization: Bearer {{jwt_token}}
     "role": "admin"
 }
 Accept: application/json
-Authorization: Bearer
+Authorization: Bearer {{jwt_token}}
+
+### GameDAO endpoint readAllTest
+GET {{url}}/games
+Accept: application/json
+Authorization: Bearer {{jwt_token}}
+
+### GameDAO endpoint searchByNameTest
+GET {{url}}/games/search?query=Elden Ring
+Accept: application/json
+Authorization: Bearer {{jwt_token}}
+
+### GameDAO endpoint SearchByIdTest
+GET {{url}}/game/3
+Accept: application/json
+Authorization: Bearer {{jwt_token}}
