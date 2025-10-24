@@ -11,9 +11,11 @@ import java.util.stream.Collectors;
 public class SecurityDAO implements ISecurityDAO {
     private static ISecurityDAO instance;
     private static EntityManagerFactory emf;
+
     public SecurityDAO(EntityManagerFactory _emf) {
         emf = _emf;
     }
+
     private EntityManager getEntityManager() {
         return emf.createEntityManager();
     }
@@ -63,8 +65,8 @@ public class SecurityDAO implements ISecurityDAO {
                     .setParameter("role", "user")
                     .getResultStream()
                     .findFirst()
-                    .orElseGet(() -> new Role("user"));
-            if(userRole == null) {
+                    .orElse(null);
+            if (userRole == null) {
                 userRole = new Role("user");
                 em.persist(userRole);
             }
@@ -82,61 +84,73 @@ public class SecurityDAO implements ISecurityDAO {
     public User addRole(User user, String newRole) {
         try (EntityManager em = getEntityManager()) {
             if (user == null)
-                throw new EntityNotFoundException("No user found with username: " + user.getUsername());
+                throw new EntityNotFoundException("User cannot be null");
+            User managedUser = em.merge(user);
             em.getTransaction().begin();
-            Role role = em.find(Role.class, newRole);
+            Role role = em.createQuery("SELECT r FROM Role r WHERE r.name = :role", Role.class)
+                    .setParameter("role", newRole)
+                    .getResultStream()
+                    .findFirst()
+                    .orElse(null);
             if (role == null) {
                 role = new Role(newRole);
                 em.persist(role);
             }
-            user.addRole(role);
+            managedUser.addRole(role);
             em.getTransaction().commit();
-            return user;
+            return managedUser;
         }
     }
 
+    @Override
     public User editUser(User user) {
         try (EntityManager em = getEntityManager()) {
             User checkedUser = em.find(User.class, user.getId());
             if (checkedUser == null) {
-                throw new EntityNotFoundException("No user found with user with id: " + user.getId());
+                throw new EntityNotFoundException("No user found with id: " + user.getId());
             }
             em.getTransaction().begin();
-            user.setPassword(user.getPassword());
-            em.merge(user);
+            checkedUser.setPassword(user.getPassword());
+            em.merge(checkedUser);
             em.getTransaction().commit();
-            return user;
+            return checkedUser;
         }
     }
 
+    @Override
     public User getUserByUsername(String username) {
         try (EntityManager em = getEntityManager()) {
             TypedQuery<User> query = em.createQuery(
                     "SELECT u FROM User u WHERE u.username = :username", User.class);
             query.setParameter("username", username);
-            User user = query.getSingleResult();
-            if (user == null)
+            User user;
+            try {
+                user = query.getSingleResult();
+            } catch (NoResultException e) {
                 throw new EntityNotFoundException("No user found with username: " + username);
+            }
             user.getRoles().size();
             return user;
         }
     }
 
+    @Override
     public User getUserById(Integer id) {
         try (EntityManager em = getEntityManager()) {
             User user = em.find(User.class, id);
             if (user == null)
                 throw new EntityNotFoundException("No user found with id: " + id);
-            user.getRoles().size();
+            user.getRoles().size(); // Force lazy loading
             return user;
         }
     }
 
+    @Override
     public void deleteUser(Integer id) {
         try (EntityManager em = getEntityManager()) {
             User user = em.find(User.class, id);
             if (user == null) {
-                throw new EntityNotFoundException("No user found with username: " + id);
+                throw new EntityNotFoundException("No user found with id: " + id);
             }
             em.getTransaction().begin();
             for (Role role : user.getRoles()) {
