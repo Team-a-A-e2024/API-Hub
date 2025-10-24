@@ -1,5 +1,6 @@
 package dat.config;
 
+import dat.dtos.IgdbGame;
 import dat.entities.Game;
 import dat.entities.Genre;
 import dat.security.entities.Role;
@@ -47,6 +48,7 @@ public class HibernateConfig {
         configuration.addAnnotatedClass(Role.class);
         configuration.addAnnotatedClass(Game.class);
         configuration.addAnnotatedClass(Genre.class);
+        configuration.addAnnotatedClass(IgdbGame.class);
     }
 
     private static EntityManagerFactory createEMF(boolean forTest) {

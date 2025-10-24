@@ -25,8 +25,8 @@ public class GameDTO {
         this.name = g.getName();
         this.firstReleaseDate = g.getFirstReleaseDate();
         this.summary = g.getSummary();
-        this.genres = g.getGenres() != null
-                ? g.getGenres().stream().map(GenreDTO::new).collect(Collectors.toList())
-                : null;
+        this.genres = (g.getGenres() == null)
+                ? List.of()
+                : g.getGenres().stream().map(GenreDTO::new).collect(Collectors.toList());
     }
 }
