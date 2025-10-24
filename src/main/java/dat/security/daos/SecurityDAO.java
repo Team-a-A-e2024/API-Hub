@@ -5,10 +5,7 @@ import dat.security.entities.Role;
 import dat.security.entities.User;
 import dat.security.exceptions.ApiException;
 import dat.security.exceptions.ValidationException;
-import jakarta.persistence.EntityExistsException;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.*;
 import java.util.stream.Collectors;
 
 public class SecurityDAO implements ISecurityDAO {
@@ -24,64 +21,88 @@ public class SecurityDAO implements ISecurityDAO {
     @Override
     public UserDTO getVerifiedUser(String username, String password) throws ValidationException {
         try (EntityManager em = getEntityManager()) {
-            User user = em.find(User.class, username);
-            if (user == null)
+            TypedQuery<User> query = em.createQuery(
+                    "SELECT u FROM User u WHERE u.username = :username", User.class);
+            query.setParameter("username", username);
+            User user;
+            try {
+                user = query.getSingleResult();
+            } catch (NoResultException e) {
                 throw new EntityNotFoundException("No user found with username: " + username);
+            }
             user.getRoles().size();
-            if (!user.verifyPassword(password))
+            if (!user.verifyPassword(password)) {
                 throw new ValidationException("Wrong password");
-            return new UserDTO(user.getUsername(), user.getRoles().stream().map(r -> r.getRoleName()).collect(Collectors.toSet()));
+            }
+            return new UserDTO(
+                    user.getId(),
+                    user.getUsername(),
+                    user.getRoles().stream()
+                            .map(Role::getRoleName)
+                            .collect(Collectors.toSet())
+            );
         }
     }
 
     @Override
     public User createUser(String username, String password) {
         try (EntityManager em = getEntityManager()) {
-            User userEntity = em.find(User.class, username);
-            if (userEntity != null)
+            TypedQuery<User> query = em.createQuery(
+                    "SELECT u FROM User u WHERE u.username = :username", User.class);
+            query.setParameter("username", username);
+            User existingUser = null;
+            try {
+                existingUser = query.getSingleResult();
+            } catch (NoResultException e) {
+            }
+            if (existingUser != null)
                 throw new EntityExistsException("User with username: " + username + " already exists");
-            userEntity = new User(username, password);
+            User userEntity = new User(username, password);
             em.getTransaction().begin();
-            Role userRole = em.find(Role.class, "user");
-            if (userRole == null)
+            Role userRole = em.createQuery("SELECT r FROM Role r WHERE r.name = :role", Role.class)
+                    .setParameter("role", "user")
+                    .getResultStream()
+                    .findFirst()
+                    .orElseGet(() -> new Role("user"));
+            if(userRole == null) {
                 userRole = new Role("user");
-            em.persist(userRole);
+                em.persist(userRole);
+            }
             userEntity.addRole(userRole);
             em.persist(userEntity);
             em.getTransaction().commit();
             return userEntity;
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             throw new ApiException(400, e.getMessage());
         }
     }
 
     @Override
-    public User addRole(UserDTO userDTO, String newRole) {
+    public User addRole(User user, String newRole) {
         try (EntityManager em = getEntityManager()) {
-            User user = em.find(User.class, userDTO.getUsername());
             if (user == null)
-                throw new EntityNotFoundException("No user found with username: " + userDTO.getUsername());
+                throw new EntityNotFoundException("No user found with username: " + user.getUsername());
             em.getTransaction().begin();
-                Role role = em.find(Role.class, newRole);
-                if (role == null) {
-                    role = new Role(newRole);
-                    em.persist(role);
-                }
-                user.addRole(role);
+            Role role = em.find(Role.class, newRole);
+            if (role == null) {
+                role = new Role(newRole);
+                em.persist(role);
+            }
+            user.addRole(role);
             em.getTransaction().commit();
             return user;
         }
     }
 
-    public User editUser(UserDTO userDTO) {
+    public User editUser(User user) {
         try (EntityManager em = getEntityManager()) {
-            User user = em.find(User.class, userDTO.getUsername());
-            if (user == null) {
-                throw new EntityNotFoundException("No user found with username: " + userDTO.getUsername());
+            User checkedUser = em.find(User.class, user.getId());
+            if (checkedUser == null) {
+                throw new EntityNotFoundException("No user found with user with id: " + user.getId());
             }
             em.getTransaction().begin();
-            user.setPassword(userDTO.getPassword());
+            user.setPassword(user.getPassword());
             em.merge(user);
             em.getTransaction().commit();
             return user;
@@ -90,7 +111,10 @@ public class SecurityDAO implements ISecurityDAO {
 
     public User getUserByUsername(String username) {
         try (EntityManager em = getEntityManager()) {
-            User user = em.find(User.class, username);
+            TypedQuery<User> query = em.createQuery(
+                    "SELECT u FROM User u WHERE u.username = :username", User.class);
+            query.setParameter("username", username);
+            User user = query.getSingleResult();
             if (user == null)
                 throw new EntityNotFoundException("No user found with username: " + username);
             user.getRoles().size();
@@ -98,11 +122,21 @@ public class SecurityDAO implements ISecurityDAO {
         }
     }
 
-    public void deleteUser(String username) {
+    public User getUserById(Integer id) {
         try (EntityManager em = getEntityManager()) {
-            User user = em.find(User.class, username);
+            User user = em.find(User.class, id);
+            if (user == null)
+                throw new EntityNotFoundException("No user found with id: " + id);
+            user.getRoles().size();
+            return user;
+        }
+    }
+
+    public void deleteUser(Integer id) {
+        try (EntityManager em = getEntityManager()) {
+            User user = em.find(User.class, id);
             if (user == null) {
-                throw new EntityNotFoundException("No user found with username: " + username);
+                throw new EntityNotFoundException("No user found with username: " + id);
             }
             em.getTransaction().begin();
             for (Role role : user.getRoles()) {
@@ -114,4 +148,3 @@ public class SecurityDAO implements ISecurityDAO {
         }
     }
 }
-

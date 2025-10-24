@@ -1,6 +1,8 @@
 package dat.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dat.Service.FetchTools;
+import dat.Service.IgdbManager;
 import dat.routes.Routes;
 import dat.security.controllers.AccessController;
 import dat.security.controllers.SecurityController;
@@ -33,6 +35,9 @@ public class ApplicationConfig {
     }
 
     public static Javalin startServer(int port) {
+        IgdbManager.getInstance().setFetchTools(new FetchTools());
+        IgdbManager.getInstance().start();
+
         Javalin app = Javalin.create(ApplicationConfig::configuration);
 
         app.beforeMatched(accessController::accessHandler);

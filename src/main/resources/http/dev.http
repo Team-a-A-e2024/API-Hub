@@ -4,6 +4,9 @@ GET {{url}}/auth/test/
 ### Populate the database with some data
 GET {{url}}/hotels/populate/
 
+###
+GET {{url}}/auth/user/1
+
 ### Create a new user - this one will only get a USER role by default
 POST {{url}}/auth/register/
 
@@ -12,6 +15,11 @@ POST {{url}}/auth/register/
     "password": "test123"
 }
 
+> {%
+    client.global.set("jwt_token", response.body.token);
+    console.log("JWT Token:", client.global.get("jwt_token"));
+%}
+
 ###
 POST {{url}}/auth/login/
 
@@ -19,6 +27,22 @@ POST {{url}}/auth/login/
     "username": "user",
     "password": "test123"
 }
+
+###
+PUT {{url}}/auth/user/1
+Accept: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+    "id": 1,
+    "username": "user",
+    "password": "newpass123"
+}
+
+###
+DELETE {{url}}/auth/user/1
+Accept: application/json
+Authorization: Bearer {{jwt_token}}
 
 > {%
     client.global.set("jwt_token", response.body.token);
@@ -43,5 +67,20 @@ Authorization: Bearer {{jwt_token}}
 {
     "role": "admin"
 }
+Accept: application/json
+Authorization: Bearer {{jwt_token}}
+
+### GameDAO endpoint readAllTest
+GET {{url}}/games
+Accept: application/json
+Authorization: Bearer {{jwt_token}}
+
+### GameDAO endpoint searchByNameTest
+GET {{url}}/games/search?query=Elden Ring
+Accept: application/json
+Authorization: Bearer {{jwt_token}}
+
+### GameDAO endpoint SearchByIdTest
+GET {{url}}/game/3
 Accept: application/json
 Authorization: Bearer {{jwt_token}}

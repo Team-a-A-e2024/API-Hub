@@ -163,7 +163,7 @@ public class SecurityController {
             ObjectNode returnObject = objectMapper.createObjectNode();
             try {
                 String newRole = ctx.bodyAsClass(ObjectNode.class).get("role").asText();
-                UserDTO user = ctx.attribute("user");
+                User user = ctx.attribute("user");
                 User updatedUser = securityDAO.addRole(user, newRole);
                 ctx.status(200).json(returnObject.put("msg", "Role " + newRole + " added to user"));
             } catch (EntityNotFoundException e) {
@@ -174,7 +174,7 @@ public class SecurityController {
 
     public Handler getUserByUsername() {
         return ctx -> {
-            String username = ctx.pathParam("id"); // {id} i URL'en = username
+            String username = ctx.pathParam("id");
             try {
                 User user = securityDAO.getUserByUsername(username);
                 UserDTO dto = new UserDTO(
@@ -191,23 +191,42 @@ public class SecurityController {
         };
     }
 
-    public Handler editUser() {
+    public Handler getUserById() {
         return ctx -> {
-            String username = ctx.pathParam("id");
-            UserDTO userDTO = ctx.bodyAsClass(UserDTO.class);
-            ObjectNode returnObject = objectMapper.createObjectNode();
+            Integer id = Integer.parseInt(ctx.pathParam("id"));
             try {
-                if (!username.equals(userDTO.getUsername())) {
-                    userDTO = new UserDTO(username, userDTO.getRoles());
-                }
-                User updatedUser = securityDAO.editUser(userDTO);
+                User user = securityDAO.getUserById(id);
                 UserDTO dto = new UserDTO(
-                        updatedUser.getId(),
-                        updatedUser.getUsername(),
-                        updatedUser.getRoles().stream()
+                        user.getId(),
+                        user.getUsername(),
+                        user.getRoles().stream()
                                 .map(Role::getRoleName)
                                 .collect(Collectors.toSet())
                 );
+                ctx.status(200).json(dto);
+            } catch (EntityNotFoundException e) {
+                ctx.status(404).json("{\"msg\":\"User not found\"}");
+            }
+        };
+    }
+
+    public Handler editUser() {
+        return ctx -> {
+            String id = ctx.pathParam("id");
+            User user = ctx.bodyAsClass(User.class);
+            ObjectNode returnObject = objectMapper.createObjectNode();
+            User username= securityDAO.getUserById(Integer.parseInt(id));
+            UserDTO dto = new UserDTO();
+            try {
+                if (!username.verifyPassword(username.getPassword())) {
+                    User updatedUser = securityDAO.editUser(username);
+                    dto = new UserDTO(
+                            updatedUser.getId(),
+                            updatedUser.getUsername(),
+                            updatedUser.getRoles().stream()
+                                    .map(Role::getRoleName)
+                                    .collect(Collectors.toSet()));
+                }
                 ctx.status(200).json(dto);
             } catch (EntityNotFoundException e) {
                 ctx.status(404).json(returnObject.put("msg", "User not found"));
@@ -219,9 +238,9 @@ public class SecurityController {
 
     public Handler deleteUser() {
         return ctx -> {
-            String username = ctx.pathParam("id");
+            int id = Integer.parseInt(ctx.pathParam("id")); // Henter {id} fra URL'en
             try {
-                securityDAO.deleteUser(username);
+                securityDAO.deleteUser(id);
                 ctx.status(200).json("{\"msg\":\"User deleted successfully\"}");
             } catch (EntityNotFoundException e) {
                 ctx.status(404).json("{\"msg\":\"User not found\"}");
