@@ -6,6 +6,8 @@ import dat.security.entities.User;
 import dat.security.exceptions.ApiException;
 import dat.security.exceptions.ValidationException;
 import jakarta.persistence.*;
+import org.mindrot.jbcrypt.BCrypt;
+
 import java.util.stream.Collectors;
 
 public class SecurityDAO implements ISecurityDAO {
@@ -110,7 +112,12 @@ public class SecurityDAO implements ISecurityDAO {
                 throw new EntityNotFoundException("No user found with id: " + user.getId());
             }
             em.getTransaction().begin();
-            checkedUser.setPassword(user.getPassword());
+            if (user.getPassword() != null && !user.getPassword().isBlank()) {
+                if (!user.getPassword().equals(checkedUser.getPassword())) {
+                    String hashedPw = BCrypt.hashpw(user.getPassword(), BCrypt.gensalt());
+                    checkedUser.setPassword(hashedPw);
+                }
+            }
             em.merge(checkedUser);
             em.getTransaction().commit();
             return checkedUser;
