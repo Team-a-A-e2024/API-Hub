@@ -7,8 +7,10 @@ import dat.security.exceptions.ValidationException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityNotFoundException;
+import kotlin.collections.builders.SetBuilder;
 import org.junit.jupiter.api.*;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -31,9 +33,7 @@ class SecurityDAOTest {
     void setup() {
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
-            em.createNativeQuery("TRUNCATE TABLE user_roles RESTART IDENTITY CASCADE").executeUpdate();
-            em.createNativeQuery("TRUNCATE TABLE users RESTART IDENTITY CASCADE").executeUpdate();
-            em.createNativeQuery("TRUNCATE TABLE roles RESTART IDENTITY CASCADE").executeUpdate();
+            em.createNativeQuery("TRUNCATE TABLE users, roles, user_roles RESTART IDENTITY CASCADE").executeUpdate();
             em.getTransaction().commit();
         }
     }
@@ -51,13 +51,18 @@ class SecurityDAOTest {
 
         // Creating user as reference
         User createdUser = dao.createUser(username, password);
+        Set<String> roles = createdUser.getRoles().stream()
+                .map(role -> role.getRoleName())
+                .collect(Collectors.toSet());
+        UserDTO expectedUser = new UserDTO(createdUser.getId(), createdUser.getUsername(), roles);
+
 
         // Act
         UserDTO result = dao.getVerifiedUser(username, password);
 
         // Assert
         assertNotNull(result);
-        assertEquals(createdUser.getUsername(), result.getUsername());
+        assertEquals(expectedUser, result);
         assertTrue(result.getRoles().contains("user"));
     }
 
@@ -177,6 +182,20 @@ class SecurityDAOTest {
         // Assert
         assertTrue(updatedUser.verifyPassword("newPassword123"));
         assertFalse(updatedUser.verifyPassword("oldPassword123"));
+    }
+
+    @Test
+    void editUser_doesNotChangeUsername() {
+        // Arrange
+        User createdUser = dao.createUser("testuser", "password123");
+
+        // Act
+        createdUser.setUsername("newusername");
+        User updatedUser = dao.editUser(createdUser);
+
+        // Assert
+        assertEquals("testuser", updatedUser.getUsername());
+        assertTrue(updatedUser.verifyPassword("password123"));
     }
 
     @Test
