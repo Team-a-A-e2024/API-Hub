@@ -4,6 +4,7 @@ import dat.config.HibernateConfig;
 import dat.daos.IDAO;
 import dat.dtos.GameDTO;
 import dat.entities.Game;
+import dat.entities.Genre;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.TypedQuery;
@@ -114,4 +115,29 @@ public class GameDAO implements IDAO<GameDTO, Integer> {
             return query.getResultList().stream().map(GameDTO::new).toList();
         }
     }
+
+    public GameDTO addGenre(int gameId, int genreId) {
+        try (var em = emf.createEntityManager()) {
+            em.getTransaction().begin();
+            try {
+                Game game = em.find(Game.class, gameId);
+                if (game == null) {
+                    em.getTransaction().rollback();
+                    return null;
+                }
+                Genre genre = em.find(Genre.class, genreId);
+                if (genre == null) {
+                    em.getTransaction().rollback();
+                    return null;
+                }
+                game.getGenres().add(genre);
+                em.getTransaction().commit();
+                return new GameDTO(game);
+            } catch (RuntimeException e) {
+                if (em.getTransaction().isActive()) em.getTransaction().rollback();
+                throw e;
+            }
+        }
+    }
+
 }

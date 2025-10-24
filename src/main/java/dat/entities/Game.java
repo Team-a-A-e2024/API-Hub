@@ -2,7 +2,10 @@ package dat.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "games")
@@ -25,4 +28,12 @@ public class Game {
 
     @Column(columnDefinition = "TEXT", length = 10000)
     private String summary;
+
+    @ManyToMany
+    @JoinTable(
+            name = "game_genres",
+            joinColumns = @JoinColumn(name = "game_id"),
+            inverseJoinColumns = @JoinColumn(name = "genre_id")
+    )
+    private Set<Genre> genres = new HashSet<>();
 }

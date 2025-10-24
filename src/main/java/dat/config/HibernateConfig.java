@@ -1,6 +1,7 @@
 package dat.config;
 
 import dat.entities.Game;
+import dat.entities.Genre;
 import dat.security.entities.Role;
 import dat.security.entities.User;
 import dat.utils.Utils;
@@ -33,7 +34,7 @@ public class HibernateConfig {
     }
 
     public static EntityManagerFactory getEntityManagerFactoryForTest() {
-        if (emfTest == null){
+        if (emfTest == null) {
             setTest(true);
             emfTest = createEMF(getTest());  // No DB needed for test
         }
@@ -45,6 +46,7 @@ public class HibernateConfig {
         configuration.addAnnotatedClass(User.class);
         configuration.addAnnotatedClass(Role.class);
         configuration.addAnnotatedClass(Game.class);
+        configuration.addAnnotatedClass(Genre.class);
     }
 
     private static EntityManagerFactory createEMF(boolean forTest) {
@@ -62,15 +64,13 @@ public class HibernateConfig {
             }
             configuration.setProperties(props);
             getAnnotationConfiguration(configuration);
-
             ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
                     .applySettings(configuration.getProperties())
                     .build();
             SessionFactory sf = configuration.buildSessionFactory(serviceRegistry);
             EntityManagerFactory emf = sf.unwrap(EntityManagerFactory.class);
             return emf;
-        }
-        catch (Throwable ex) {
+        } catch (Throwable ex) {
             System.err.println("Initial SessionFactory creation failed." + ex);
             throw new ExceptionInInitializerError(ex);
         }
@@ -79,7 +79,7 @@ public class HibernateConfig {
     private static Properties setBaseProperties(Properties props) {
         props.put("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
         props.put("hibernate.connection.driver_class", "org.postgresql.Driver");
-        props.put("hibernate.hbm2ddl.auto", "create");
+        props.put("hibernate.hbm2ddl.auto", "update");
         props.put("hibernate.current_session_context_class", "thread");
         props.put("hibernate.show_sql", "true");
         props.put("hibernate.format_sql", "true");
