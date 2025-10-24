@@ -1,13 +1,20 @@
 package dat.security.daos;
 
+import com.nimbusds.jose.JOSEException;
+import dat.dtos.GameDTO;
+import dat.entities.Game;
 import dat.security.dtos.UserDTO;
 import dat.security.entities.Role;
 import dat.security.entities.User;
 import dat.security.exceptions.ApiException;
+import dat.security.exceptions.NotAuthorizedException;
 import dat.security.exceptions.ValidationException;
+import dat.security.token.TokenSecurity;
+import io.javalin.http.HttpStatus;
 import jakarta.persistence.*;
 import org.mindrot.jbcrypt.BCrypt;
 
+import java.text.ParseException;
 import java.util.stream.Collectors;
 
 public class SecurityDAO implements ISecurityDAO {
@@ -166,6 +173,50 @@ public class SecurityDAO implements ISecurityDAO {
             user.getRoles().clear();
             em.remove(user);
             em.getTransaction().commit();
+        }
+    }
+
+    public UserDTO addFavoriteGame(UserDTO user, GameDTO game) {
+        try (EntityManager em = getEntityManager()) {
+            User checkedUser = em.find(User.class, user.getId());
+            if (checkedUser == null) {
+                throw new EntityNotFoundException("No user found with id: " + user.getId());
+            }
+            em.getTransaction().begin();
+
+            checkedUser.addGame(Game.builder()
+                    .id(game.getId())
+                    .name(game.getName())
+                    .summary(game.getSummary())
+                    .firstReleaseDate(game.getFirstReleaseDate())
+                    .build());
+            em.merge(checkedUser);
+            em.getTransaction().commit();
+            return new UserDTO(checkedUser);
+        }
+    }
+
+    public UserDTO removeFavoriteGame(UserDTO user, GameDTO game) {
+        try (EntityManager em = getEntityManager()) {
+            User checkedUser = em.find(User.class, user.getId());
+            Game checkedGame = em.find(Game.class, game.getId());
+            if (checkedUser == null) {
+                throw new EntityNotFoundException("No user found with id: " + user.getId());
+            }
+            if (checkedGame == null) {
+                throw new EntityNotFoundException("No game found with id:" + game.getId());
+            }
+            em.getTransaction().begin();
+            checkedUser.removeGame(checkedGame);
+            em.merge(checkedUser);
+            em.getTransaction().commit();
+            return new UserDTO(checkedUser);
+        }
+    }
+
+    public boolean validatePrimaryKey(Integer id) {
+        try (EntityManager em = emf.createEntityManager()) {
+            return em.find(User.class, id) != null;
         }
     }
 }
