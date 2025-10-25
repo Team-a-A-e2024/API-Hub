@@ -1,5 +1,6 @@
 package dat.controllers.impl;
 
+import dat.config.HibernateConfig;
 import dat.controllers.IController;
 import dat.daos.impl.GameDAO;
 import dat.dtos.GameDTO;
@@ -10,6 +11,10 @@ import java.util.List;
 public class GameController implements IController<GameDTO, Integer> {
 
     private final GameDAO dao;
+
+    public GameController(GameDAO dao) {
+        this.dao = dao;
+    }
 
     public GameController() {
         this.dao = GameDAO.getInstance();

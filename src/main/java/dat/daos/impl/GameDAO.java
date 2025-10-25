@@ -4,10 +4,12 @@ import dat.config.HibernateConfig;
 import dat.daos.IDAO;
 import dat.dtos.GameDTO;
 import dat.entities.Game;
+import dat.entities.Genre;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.TypedQuery;
 
+import java.util.HashSet;
 import java.util.List;
 
 public class GameDAO implements IDAO<GameDTO, Integer> {
@@ -50,6 +52,17 @@ public class GameDAO implements IDAO<GameDTO, Integer> {
                         .firstReleaseDate(dto.getFirstReleaseDate())
                         .summary(dto.getSummary())
                         .build();
+                if (dto.getGenres() != null) {
+                    for (var gd : dto.getGenres()) {
+                        if (gd.getName() == null || gd.getName().isBlank()) continue;
+                        Genre genre = em.find(Genre.class, gd.getName());
+                        if (genre == null) {
+                            genre = Genre.builder().name(gd.getName()).build();
+                            em.persist(genre);
+                        }
+                        g.getGenres().add(genre);
+                    }
+                }
                 em.persist(g);
                 em.getTransaction().commit();
                 return new GameDTO(g);
@@ -112,6 +125,30 @@ public class GameDAO implements IDAO<GameDTO, Integer> {
             );
             query.setParameter("q", "%" + q.toLowerCase() + "%");
             return query.getResultList().stream().map(GameDTO::new).toList();
+        }
+    }
+
+    public GameDTO addGenre(int gameId, String genreName) {
+        try (EntityManager em = emf.createEntityManager()) {
+            em.getTransaction().begin();
+            try {
+                Game g = em.find(Game.class, gameId);
+                if (g == null) {
+                    em.getTransaction().rollback();
+                    return null;
+                }
+                Genre genre = em.find(Genre.class, genreName);
+                if (genre == null) {
+                    genre = Genre.builder().name(genreName).build();
+                    em.persist(genre);
+                }
+                g.getGenres().add(genre);
+                em.getTransaction().commit();
+                return new GameDTO(g);
+            } catch (RuntimeException e) {
+                if (em.getTransaction().isActive()) em.getTransaction().rollback();
+                throw e;
+            }
         }
     }
 }
