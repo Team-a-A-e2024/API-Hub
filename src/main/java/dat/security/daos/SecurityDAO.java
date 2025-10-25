@@ -176,15 +176,15 @@ public class SecurityDAO implements ISecurityDAO {
         }
     }
 
-    public UserDTO addFavoriteGame(UserDTO user, GameDTO game) {
+    public UserDTO addFavoriteGame(Integer userId, Integer gameId) {
         try (EntityManager em = getEntityManager()) {
-            User checkedUser = em.find(User.class, user.getId());
-            Game checkedGame = em.find(Game.class, game.getId());
+            User checkedUser = em.find(User.class, userId);
+            Game checkedGame = em.find(Game.class, gameId);
             if (checkedUser == null) {
-                throw new EntityNotFoundException("No user found with id: " + user.getId());
+                throw new EntityNotFoundException("No user found with id: " + userId);
             }
             if (checkedGame == null) {
-                throw new EntityNotFoundException("No game found with id: " + game.getId());
+                throw new EntityNotFoundException("No game found with id: " + gameId);
             }
             em.getTransaction().begin();
             checkedUser.addGame(checkedGame);
@@ -194,15 +194,15 @@ public class SecurityDAO implements ISecurityDAO {
         }
     }
 
-    public UserDTO removeFavoriteGame(UserDTO user, GameDTO game) {
+    public UserDTO removeFavoriteGame(Integer userId, Integer gameId) {
         try (EntityManager em = getEntityManager()) {
-            User checkedUser = em.find(User.class, user.getId());
-            Game checkedGame = em.find(Game.class, game.getId());
+            User checkedUser = em.find(User.class, userId);
+            Game checkedGame = em.find(Game.class, gameId);
             if (checkedUser == null) {
-                throw new EntityNotFoundException("No user found with id: " + user.getId());
+                throw new EntityNotFoundException("No user found with id: " + userId);
             }
             if (checkedGame == null) {
-                throw new EntityNotFoundException("No game found with id: " + game.getId());
+                throw new EntityNotFoundException("No game found with id: " + gameId);
             }
             em.getTransaction().begin();
             checkedUser.removeGame(checkedGame);
