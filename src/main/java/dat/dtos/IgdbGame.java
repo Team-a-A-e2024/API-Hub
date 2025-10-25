@@ -20,7 +20,7 @@ public class IgdbGame {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    private static class Genre {
+    public static class Genre {
         private int id;
         private String name;
     }
