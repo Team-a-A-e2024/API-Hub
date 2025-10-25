@@ -44,7 +44,7 @@ public class GameDAO implements IDAO<GameDTO, Integer> {
 
     @Override
     public GameDTO create(GameDTO dto) {
-        try (var em = emf.createEntityManager()) {
+        try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
             try {
                 Game g = Game.builder()

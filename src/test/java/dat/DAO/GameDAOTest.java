@@ -12,6 +12,7 @@ import org.junit.jupiter.api.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -207,8 +208,15 @@ class GameDAOTest {
                     .setParameter(2, genreName)
                     .getSingleResult();
             assertEquals(1, count.intValue());
+            @SuppressWarnings("unchecked")
+            List<String> names = em.createNativeQuery(
+                            "SELECT genre_name FROM game_genres WHERE game_id = ?1")
+                    .setParameter(1, gameId)
+                    .getResultList();
+            assertEquals(Set.of(genreName), Set.copyOf(names));
         }
     }
+
     @Test
     void create_savesGenres() {
         GameDTO dto = GameDTO.builder()
@@ -217,17 +225,17 @@ class GameDAOTest {
                 .summary("CRPG")
                 .genres(List.of(new GenreDTO("RPG"), new GenreDTO("Fantasy")))
                 .build();
-
         GameDTO saved = dao.create(dto);
         assertNotNull(saved.getId());
-
         try (EntityManager em = emf.createEntityManager()) {
-            Number count = (Number) em.createNativeQuery(
-                            "SELECT COUNT(*) FROM game_genres WHERE game_id = ?1")
+            @SuppressWarnings("unchecked")
+            List<String> actual = em.createNativeQuery(
+                            "SELECT genre_name FROM game_genres WHERE game_id = ?1")
                     .setParameter(1, saved.getId())
-                    .getSingleResult();
-            assertEquals(2, count.intValue());
+                    .getResultList();
+            assertEquals(Set.of("RPG", "Fantasy"), Set.copyOf(actual));
         }
     }
+
 
 }
