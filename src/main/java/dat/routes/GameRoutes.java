@@ -8,12 +8,14 @@ import static io.javalin.apibuilder.ApiBuilder.*;
 
 public class GameRoutes {
     private final GameController gameController = new GameController();
+    private final FavoriteRoutes favoriteRoutes = new FavoriteRoutes();
 
     // Flertal: /api/games...
     public EndpointGroup collection() {
         return () -> {
             get("/",  gameController::readAll,Role.ANYONE);            // GET /api/games
             get("/search", gameController::searchByName,Role.ANYONE);  // GET /api/games/search?query=...
+            path("/{id}", favoriteRoutes.item());
         };
     }
     // Ental: /api/game/{id}...

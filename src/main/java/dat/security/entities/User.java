@@ -1,5 +1,6 @@
 package dat.security.entities;
 
+import dat.entities.Game;
 import jakarta.persistence.*;
 import lombok.*;
 import org.mindrot.jbcrypt.BCrypt;
@@ -16,6 +17,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@EqualsAndHashCode
 public class User implements Serializable, ISecurityUser {
 
     @Serial
@@ -33,9 +35,21 @@ public class User implements Serializable, ISecurityUser {
     @Column(name = "password")
     private String password;
 
-    @JoinTable(name = "user_roles", joinColumns = {@JoinColumn(name = "user_name", referencedColumnName = "username")}, inverseJoinColumns = {@JoinColumn(name = "role_name", referencedColumnName = "name")})
+    @JoinTable(
+            name = "user_roles",
+            joinColumns = {@JoinColumn(name = "user_name", referencedColumnName = "username")},
+            inverseJoinColumns = {@JoinColumn(name = "role_name", referencedColumnName = "name")}
+    )
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     private Set<Role> roles = new HashSet<>();
+
+    @JoinTable(
+            name = "favorites",
+            joinColumns = {@JoinColumn(name = "user_id", referencedColumnName = "id")},
+            inverseJoinColumns = {@JoinColumn(name = "game_id", referencedColumnName = "id")}
+    )
+    @ManyToMany(fetch = FetchType.EAGER)
+    private Set<Game> games = new HashSet<>();
 
     public Set<String> getRolesAsStrings() {
         if (roles.isEmpty()) {
@@ -78,6 +92,14 @@ public class User implements Serializable, ISecurityUser {
                     roles.remove(role);
                     role.getUsers().remove(this);
                 });
+    }
+
+    public void addGame(Game game) {
+        games.add(game);
+    }
+
+    public void removeGame(Game game) {
+        games.remove(game);
     }
 }
 

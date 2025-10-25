@@ -36,4 +36,8 @@ public class ExceptionController {
     public static void e4(Context ctx, String w) {
         ctx.status(404).json(new Message(404, "Could not delete '" + w + "'"));
     }
+
+    public static void e5(Context ctx) {
+        ctx.status(403).json(new Message(403, "Access denied, you do not have permission for this resource"));
+    }
 }

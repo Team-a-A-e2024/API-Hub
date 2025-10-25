@@ -1,5 +1,7 @@
 package dat.security.dtos;
 
+import dat.entities.Game;
+import dat.security.entities.User;
 import lombok.*;
 import java.util.HashSet;
 import java.util.Set;
@@ -17,6 +19,7 @@ public class UserDTO {
     private String username;
     private String password;
     Set<String> roles = new HashSet<>();
+    Set<Game> games = new HashSet<>();
 
     public UserDTO(String username, String password) {
         this.username = username;
@@ -32,5 +35,18 @@ public class UserDTO {
     public UserDTO(String username, Set<String> roles) {
         this.username = username;
         this.roles = roles;
+    }
+
+    public UserDTO(User user) {
+        this.id = user.getId();
+        this.username = user.getUsername();
+
+        if (user.getRoles() != null) {
+            user.getRoles().forEach(role -> roles.add(role.toString()));
+        }
+
+        if (user.getGames() != null) {
+            games.addAll(user.getGames());
+        }
     }
 }

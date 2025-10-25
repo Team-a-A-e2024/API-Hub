@@ -33,9 +33,16 @@ public class IgdbAccessTokenService {
     }
 
     private static String tokensURI() {
+        String clientId = System.getenv("client_id");
+        String clientSecret = System.getenv("client_secret");
+
+        if (clientId == null || clientSecret == null) {
+            throw new NullPointerException("Client ID or Client Secret not set");
+        }
+
         return "https://id.twitch.tv/oauth2/token?" +
-                "client_id=" + System.getenv("client_id") +
-                "&client_secret=" + System.getenv("client_secret") +
+                "client_id=" + clientId +
+                "&client_secret=" + clientSecret +
                 "&grant_type=client_credentials" ;
     }
 
