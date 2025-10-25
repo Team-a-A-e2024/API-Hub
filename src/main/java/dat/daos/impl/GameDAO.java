@@ -1,6 +1,5 @@
 package dat.daos.impl;
 
-import dat.config.HibernateConfig;
 import dat.daos.IDAO;
 import dat.dtos.GameDTO;
 import dat.entities.Game;
@@ -8,20 +7,14 @@ import dat.entities.Genre;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.TypedQuery;
-
-import java.util.HashSet;
 import java.util.List;
 
 public class GameDAO implements IDAO<GameDTO, Integer> {
 
-    private static final EntityManagerFactory emf = HibernateConfig.getEntityManagerFactory();
-    private static final GameDAO instance = new GameDAO();
+    private final EntityManagerFactory emf;
 
-    private GameDAO() {
-    }
-
-    public static GameDAO getInstance() {
-        return instance;
+    public GameDAO(EntityManagerFactory emf) {
+        this.emf = emf;
     }
 
     @Override

@@ -1,8 +1,10 @@
 package dat.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dat.config.HibernateConfig;
 import dat.daos.impl.GameDAO;
 import dat.utils.TimeMapper;
+import jakarta.persistence.EntityManagerFactory;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,7 +27,7 @@ public class IgdbManager {
     private IgdbGameService gameService;
     private static LocalDateTime LastUpdate;
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-    private static final  String path = "logs/igdbApiPull.Log";
+    private static final String path = "logs/igdbApiPull.Log";
 
     private IgdbManager() {}
 
@@ -58,9 +60,9 @@ public class IgdbManager {
 
         //should only run if file wasn't read as it gets everything
         if (LastUpdate == null) {
-            gameService.getGames(0L).forEach(GameDAO.getInstance()::create);
+            gameService.getGames(0L).forEach(game -> new GameDAO(HibernateConfig.getEntityManagerFactory()).create(game));
         } else {
-            gameService.getGames(TimeMapper.unixOf(LastUpdate)).forEach(GameDAO.getInstance()::create);
+            gameService.getGames(TimeMapper.unixOf(LastUpdate)).forEach(game -> new GameDAO(HibernateConfig.getEntityManagerFactory()).create(game));
         }
 
         //replace file with new one
@@ -86,7 +88,7 @@ public class IgdbManager {
         //if there hasn't been an update for 24 hours.
         if (LastUpdate.until(LocalDateTime.now(), ChronoUnit.SECONDS) > 28.800) {
             //gets every added game since last update
-            gameService.getGames(TimeMapper.unixOf(LastUpdate)).forEach(GameDAO.getInstance()::create);
+            gameService.getGames(TimeMapper.unixOf(LastUpdate)).forEach(game -> new GameDAO(HibernateConfig.getEntityManagerFactory()).create(game));
 
             try {
                 LastUpdate = LocalDateTime.now();

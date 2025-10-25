@@ -27,12 +27,12 @@ class GameDAOTest {
     void setupOnce() {
         HibernateConfig.setTest(true);
         emf = HibernateConfig.getEntityManagerFactoryForTest();
-        dao = GameDAO.getInstance();
+        dao = new GameDAO(emf);
     }
 
     @AfterAll
     void tearDownOnce() {
-        if (emf != null) emf.close();
+        if (emf != null && emf.isOpen()) emf.close();
         HibernateConfig.setTest(false);
     }
 

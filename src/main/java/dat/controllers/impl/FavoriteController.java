@@ -19,7 +19,7 @@ public class FavoriteController {
 
     public FavoriteController() {
         this.securityDAO = new SecurityDAO(HibernateConfig.getEntityManagerFactory());
-        this.gameDAO = GameDAO.getInstance();
+        this.gameDAO = new GameDAO(HibernateConfig.getEntityManagerFactory());
         this.securityController = SecurityController.getInstance();
     }
 
@@ -42,10 +42,7 @@ public class FavoriteController {
             return;
         }
 
-        UserDTO userDTO = getUserFromHeader(header);
-        GameDTO gameDTO = gameDAO.read(id);
-
-        securityDAO.addFavoriteGame(userDTO, gameDTO);
+        securityDAO.addFavoriteGame(getUserFromHeader(header).getId(), id);
 
         ctx.status(201);
     }
@@ -67,7 +64,7 @@ public class FavoriteController {
             return;
         }
 
-        securityDAO.removeFavoriteGame(userDTO, gameDTO);
+        securityDAO.removeFavoriteGame(userDTO.getId(), id);
 
         ctx.status(204);
     }

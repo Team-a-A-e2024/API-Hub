@@ -16,7 +16,7 @@ public class GameMapper {
         LocalDate release = ig.getFirstReleaseDate() == null ? null :
                 Instant.ofEpochSecond(ig.getFirstReleaseDate())
                         .atZone(ZoneId.systemDefault()).toLocalDate();
-        List<GenreDTO> genres = (ig.getGenres() == null) ? List.of()
+        List<GenreDTO> genres = (ig.getGenres() == null) ? null
                 : Arrays.stream(ig.getGenres())
                 .filter(g -> g.getName() != null && !g.getName().isBlank())
                 .map(g -> GenreDTO.builder().name(g.getName()).build())
