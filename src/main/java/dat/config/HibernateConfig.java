@@ -1,5 +1,6 @@
 package dat.config;
 
+import dat.dtos.IgdbGame;
 import dat.entities.Game;
 import dat.entities.Genre;
 import dat.security.entities.Role;

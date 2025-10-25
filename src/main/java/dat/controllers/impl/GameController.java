@@ -17,7 +17,7 @@ public class GameController implements IController<GameDTO, Integer> {
     }
 
     public GameController() {
-        this.dao = new GameDAO(HibernateConfig.getEntityManagerFactory());
+        this.dao = GameDAO.getInstance();
     }
 
     @Override

@@ -37,7 +37,7 @@ class SecurityDAOTest {
         HibernateConfig.setTest(true);
         emf = HibernateConfig.getEntityManagerFactoryForTest();
         securityDAO = new SecurityDAO(emf);
-        gameDAO = new GameDAO(emf);
+        gameDAO = GameDAO.getInstance();
     }
 
     @BeforeEach
@@ -251,7 +251,7 @@ class SecurityDAOTest {
         UserDTO expected = new UserDTO(user);
 
         // Act
-        UserDTO actual = securityDAO.addFavoriteGame(user.getId(), game.getId());
+        UserDTO actual = securityDAO.addFavoriteGame(new UserDTO(user), new GameDTO(game));
 
         // Assert
         assertThat(actual, equalTo(expected));
@@ -269,7 +269,7 @@ class SecurityDAOTest {
         // Act
         Exception exception = assertThrows(
                 EntityNotFoundException.class,
-                () -> securityDAO.addFavoriteGame(user.getId(), game.getId())
+                () -> securityDAO.addFavoriteGame(new UserDTO(user), new GameDTO(game))
         );
 
         // Assert
@@ -287,7 +287,7 @@ class SecurityDAOTest {
         // Act
         Exception exception = assertThrows(
                 EntityNotFoundException.class,
-                () -> securityDAO.addFavoriteGame(user.getId(), game.getId())
+                () -> securityDAO.addFavoriteGame(new UserDTO(user), new GameDTO(game))
         );
 
         // Assert
@@ -301,10 +301,10 @@ class SecurityDAOTest {
         Game game = g1;
         UserDTO expected = new UserDTO(user);
         user.addGame(game);
-        securityDAO.addFavoriteGame(user.getId(), game.getId());
+        securityDAO.addFavoriteGame(new UserDTO(user), new GameDTO(game));
 
         // Act
-        UserDTO actual = securityDAO.removeFavoriteGame(user.getId(), game.getId());
+        UserDTO actual = securityDAO.removeFavoriteGame(new UserDTO(user), new GameDTO(game));
 
         // Assert
         assertThat(actual, equalTo(expected));
@@ -321,7 +321,7 @@ class SecurityDAOTest {
         // Act
         Exception exception = assertThrows(
                 EntityNotFoundException.class,
-                () -> securityDAO.removeFavoriteGame(user.getId(), game.getId())
+                () -> securityDAO.removeFavoriteGame(new UserDTO(user), new GameDTO(game))
         );
 
         // Assert
@@ -338,7 +338,7 @@ class SecurityDAOTest {
         // Act
         Exception exception = assertThrows(
                 EntityNotFoundException.class,
-                () -> securityDAO.removeFavoriteGame(user.getId(), game.getId())
+                () -> securityDAO.removeFavoriteGame(new UserDTO(user), new GameDTO(game))
         );
 
         // Assert
