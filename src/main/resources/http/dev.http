@@ -1,12 +1,6 @@
 ### A simple get request to the test endpoint. No need for login
 GET {{url}}/auth/test/
 
-### Populate the database with some data
-GET {{url}}/hotels/populate/
-
-###
-GET {{url}}/auth/user/1
-
 ### Create a new user - this one will only get a USER role by default
 POST {{url}}/auth/register/
 
@@ -19,6 +13,9 @@ POST {{url}}/auth/register/
     client.global.set("jwt_token", response.body.token);
     console.log("JWT Token:", client.global.get("jwt_token"));
 %}
+
+### Get user by ID
+GET {{url}}/auth/user/1
 
 ###
 POST {{url}}/auth/login/
@@ -40,33 +37,21 @@ Authorization: Bearer {{jwt_token}}
 }
 
 ###
-DELETE {{url}}/auth/user/1
-Accept: application/json
-Authorization: Bearer {{jwt_token}}
-
-> {%
-    client.global.set("jwt_token", response.body.token);
-    console.log("JWT Token:", client.global.get("jwt_token"));
-%}
-
-###
 GET {{url}}/protected/user_demo/
 Accept: application/json
 Authorization: Bearer {{jwt_token}}
 
-###
-GET {{url}}/protected/admin_demo/
-Accept: application/json
-Authorization: Bearer {{jwt_token}}
-
 ### Add admin role to user
-POST {{url}}/auth/user/addrole/
+POST {{url}}/auth/user/role/
 Accept: application/json
 Authorization: Bearer {{jwt_token}}
 
 {
     "role": "admin"
 }
+
+###
+GET {{url}}/protected/admin_demo/
 Accept: application/json
 Authorization: Bearer {{jwt_token}}
 
@@ -82,5 +67,29 @@ Authorization: Bearer {{jwt_token}}
 
 ### GameDAO endpoint SearchByIdTest
 GET {{url}}/game/3
+Accept: application/json
+Authorization: Bearer {{jwt_token}}
+
+### Get user favorites
+GET {{url}}/user/1/favorites
+Accept: application/json
+Authorization: Bearer {{jwt_token}}
+
+### Add favorite
+POST {{url}}/games/1/favorite
+Accept: application/json
+Authorization: Bearer {{jwt_token}}
+
+{}
+
+### Remove favorite
+DELETE {{url}}/games/1/favorite
+Accept: application/json
+Authorization: Bearer {{jwt_token}}
+
+{}
+
+###
+DELETE {{url}}/auth/user/1
 Accept: application/json
 Authorization: Bearer {{jwt_token}}

@@ -17,6 +17,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@EqualsAndHashCode
 public class User implements Serializable, ISecurityUser {
 
     @Serial

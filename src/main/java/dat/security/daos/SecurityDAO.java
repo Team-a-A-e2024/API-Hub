@@ -179,17 +179,15 @@ public class SecurityDAO implements ISecurityDAO {
     public UserDTO addFavoriteGame(UserDTO user, GameDTO game) {
         try (EntityManager em = getEntityManager()) {
             User checkedUser = em.find(User.class, user.getId());
+            Game checkedGame = em.find(Game.class, game.getId());
             if (checkedUser == null) {
                 throw new EntityNotFoundException("No user found with id: " + user.getId());
             }
+            if (checkedGame == null) {
+                throw new EntityNotFoundException("No game found with id: " + game.getId());
+            }
             em.getTransaction().begin();
-
-            checkedUser.addGame(Game.builder()
-                    .id(game.getId())
-                    .name(game.getName())
-                    .summary(game.getSummary())
-                    .firstReleaseDate(game.getFirstReleaseDate())
-                    .build());
+            checkedUser.addGame(checkedGame);
             em.merge(checkedUser);
             em.getTransaction().commit();
             return new UserDTO(checkedUser);
@@ -204,7 +202,7 @@ public class SecurityDAO implements ISecurityDAO {
                 throw new EntityNotFoundException("No user found with id: " + user.getId());
             }
             if (checkedGame == null) {
-                throw new EntityNotFoundException("No game found with id:" + game.getId());
+                throw new EntityNotFoundException("No game found with id: " + game.getId());
             }
             em.getTransaction().begin();
             checkedUser.removeGame(checkedGame);
