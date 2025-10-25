@@ -8,18 +8,12 @@ import java.util.Set;
 
 @Entity
 @Table(name = "genres")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@EqualsAndHashCode(of = "name")
 public class Genre {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
-
-    @Column(nullable = false, unique = true, length = 120)
+    @Column(name = "name", nullable = false, unique = true, length = 120)
     private String name;
 
     @ManyToMany(mappedBy = "genres")

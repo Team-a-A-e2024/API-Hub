@@ -31,27 +31,22 @@ public class IgdbGameService {
     //todo: fix rate limit issues
     public List<GameDTO> getGames(final Long dateAdded) {
         int amount = fetchAmountOfGames(dateAdded).getCount();
-
         List<GameDTO> games = new ArrayList<>();
-
         //if there's no new games then return early
         if (amount <= 0) {
             return games;
         }
-
         List<Callable<IgdbGame[]>> tasks = new ArrayList<>();
         //a page has 500 games so we divide the total amount of games by 500 to get how many pages
         for (int i = 0; i < amount / 500 + 1; i++) {
             final int pageNumber = i;
             tasks.add(() -> fetchPageOfGames(pageNumber, dateAdded));
         }
-
         List<IgdbGame[]> toProcess = fetchTools.getFromApiList(tasks);
         logger.info("made " + tasks.size() + "amount of api calls, requesting " + amount + "of games");
-
         for (IgdbGame[] igdbGames : toProcess) {
             for (IgdbGame igdbGame : igdbGames) {
-                games.add(GameMapper.MapIgdbGameToGame(igdbGame));
+                games.add(GameMapper.mapIgdbToDTO(igdbGame));
             }
         }
         return games;

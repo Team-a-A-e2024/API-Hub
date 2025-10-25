@@ -14,6 +14,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode(of = "id")
 public class Game {
 
     @Id
@@ -29,11 +30,12 @@ public class Game {
     @Column(columnDefinition = "TEXT", length = 10000)
     private String summary;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "game_genres",
             joinColumns = @JoinColumn(name = "game_id"),
-            inverseJoinColumns = @JoinColumn(name = "genre_id")
+            inverseJoinColumns = @JoinColumn(name = "genre_name", referencedColumnName = "name")
     )
+    @Builder.Default
     private Set<Genre> genres = new HashSet<>();
 }

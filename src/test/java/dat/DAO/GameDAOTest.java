@@ -1,8 +1,9 @@
-package daotests;
+package dat.DAO;
 
 import dat.config.HibernateConfig;
 import dat.daos.impl.GameDAO;
 import dat.dtos.GameDTO;
+import dat.dtos.GenreDTO;
 import dat.entities.Game;
 import dat.entities.Genre;
 import jakarta.persistence.EntityManager;
@@ -181,7 +182,7 @@ class GameDAOTest {
     @Test
     void addGenre() {
         int gameId;
-        int genreId;
+        String genreName;
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
             Genre rpg = Genre.builder().name("RPG").build();
@@ -193,19 +194,40 @@ class GameDAOTest {
                     .build();
             em.persist(game);
             em.getTransaction().commit();
-            genreId = rpg.getId();
+            genreName = rpg.getName();
             gameId = game.getId();
         }
-        GameDTO after = dao.addGenre(gameId, genreId);
+        GameDTO after = dao.addGenre(gameId, genreName);
         assertNotNull(after);
         assertEquals(gameId, after.getId());
         try (EntityManager em = emf.createEntityManager()) {
             Number count = (Number) em.createNativeQuery(
-                            "SELECT COUNT(*) FROM game_genres WHERE game_id = ?1 AND genre_id = ?2")
+                            "SELECT COUNT(*) FROM game_genres WHERE game_id = ?1 AND genre_name = ?2")
                     .setParameter(1, gameId)
-                    .setParameter(2, genreId)
+                    .setParameter(2, genreName)
                     .getSingleResult();
             assertEquals(1, count.intValue());
         }
     }
+    @Test
+    void create_savesGenres() {
+        GameDTO dto = GameDTO.builder()
+                .name("Baldur's Gate 3")
+                .firstReleaseDate(LocalDate.of(2023, 8, 3))
+                .summary("CRPG")
+                .genres(List.of(new GenreDTO("RPG"), new GenreDTO("Fantasy")))
+                .build();
+
+        GameDTO saved = dao.create(dto);
+        assertNotNull(saved.getId());
+
+        try (EntityManager em = emf.createEntityManager()) {
+            Number count = (Number) em.createNativeQuery(
+                            "SELECT COUNT(*) FROM game_genres WHERE game_id = ?1")
+                    .setParameter(1, saved.getId())
+                    .getSingleResult();
+            assertEquals(2, count.intValue());
+        }
+    }
+
 }
