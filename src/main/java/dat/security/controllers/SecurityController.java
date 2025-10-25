@@ -163,11 +163,14 @@ public class SecurityController {
             ObjectNode returnObject = objectMapper.createObjectNode();
             try {
                 String newRole = ctx.bodyAsClass(ObjectNode.class).get("role").asText();
-                User user = ctx.attribute("user");
+                UserDTO userDTO = ctx.attribute("user");
+                User user = securityDAO.getUserByUsername(userDTO.getUsername());
                 User updatedUser = securityDAO.addRole(user, newRole);
                 ctx.status(200).json(returnObject.put("msg", "Role " + newRole + " added to user"));
             } catch (EntityNotFoundException e) {
                 ctx.status(404).json("{\"msg\": \"User not found\"}");
+            } catch (Exception e) {
+                ctx.status(500).json("{\"msg\": \"An unexpected error occurred\"}");
             }
         };
     }
