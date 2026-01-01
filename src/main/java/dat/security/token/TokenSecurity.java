@@ -65,9 +65,7 @@ public class TokenSecurity implements ITokenSecurity {
                     .expirationTime(new Date(new Date().getTime() + Integer.parseInt(TOKEN_EXPIRE_TIME)))
                     .build();
             Payload payload = new Payload(claimsSet.toJSONObject());
-            System.out.println(SECRET_KEY);
             JWSSigner signer = new MACSigner(SECRET_KEY);
-            System.out.println(signer);
             JWSHeader jwsHeader = new JWSHeader(JWSAlgorithm.HS256);
             JWSObject jwsObject = new JWSObject(jwsHeader, payload);
             jwsObject.sign(signer);
