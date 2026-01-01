@@ -59,12 +59,12 @@ public class TokenSecurity implements ITokenSecurity {
             JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
                     .subject(user.getUsername())
                     .issuer(ISSUER)
+                    .claim("UserId", user.getId())
                     .claim("username", user.getUsername())
                     .claim("roles", user.getRoles().stream().reduce((s1, s2) -> s1 + "," + s2).get())
                     .expirationTime(new Date(new Date().getTime() + Integer.parseInt(TOKEN_EXPIRE_TIME)))
                     .build();
             Payload payload = new Payload(claimsSet.toJSONObject());
-
             JWSSigner signer = new MACSigner(SECRET_KEY);
             JWSHeader jwsHeader = new JWSHeader(JWSAlgorithm.HS256);
             JWSObject jwsObject = new JWSObject(jwsHeader, payload);
